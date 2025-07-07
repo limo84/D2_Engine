@@ -1,0 +1,21 @@
+#ifdef USE_GLFW
+
+#include <GLFW_3_4/glfw3.h>
+
+typedef enum {
+  D2_MOUSE_BUTTON_1 = GLFW_MOUSE_BUTTON_1,
+  D2_MOUSE_BUTTON_LEFT = GLFW_MOUSE_BUTTON_1,
+  D2_KEY_F5 = GLFW_KEY_F5,
+} D2_Keys;
+
+#else
+
+#include <SDL2/SDL.h>
+
+typedef enum {
+  D2_MOUSE_BUTTON_1 = SDL_BUTTON_LEFT,
+  D2_MOUSE_BUTTON_LEFT = SDL_BUTTON_LEFT,
+  D2_KEY_F5 = SDL_SCANCODE_F5,
+} D2_Keys;
+
+#endif
