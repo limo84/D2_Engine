@@ -20,11 +20,6 @@ unsigned int shader;
 
 Matrices m;
 
-// float *m.projection; // converts clipping space to screen coords
-// float *m.view;       // "moves camera" or rather all objects (to l if cam
-// moves r) float *m.vp; float *MODEL; float *SCALE; float *TRANSLATE; float
-// *ROTATE;
-
 unsigned int modelLoc;
 unsigned int vpLoc;
 unsigned int animationFrameLoc;
@@ -85,7 +80,7 @@ void Engine_RunMainloop(void (*mainloopFunction)(void)) {
     // }
     // Timer_reset(fpsTimer);
 
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
     mainloopFunction();
 
@@ -103,8 +98,8 @@ void Sprite_DrawAt(Sprite *self, Vec2 position, float rotation) {
 
   Mat4_set_rotation(m.rotate, Engine_DegreeToRadians(rotation));
   // +50 hier ist eher sprite.width * sprite.scale / 2
-  Mat4_set_translation(
-      m.translate, position.x + self->width * globalScale / 2.0f, position.y + self->height * globalScale / 2.0f, 0);
+  Mat4_set_translation(m.translate, position.x + self->width * globalScale / 2.0f,
+      position.y + self->height * globalScale / 2.0f, 0);
   Mat4_set_scalation(m.scale, sizeX, -sizeY, 1); // TODO
 
   Mat4_multiply(m.rotate, m.scale, m.model);
@@ -122,7 +117,8 @@ void Sprite_DrawAt(Sprite *self, Vec2 position, float rotation) {
   float scaleY = 1;
 
   if (self->currentAnimation != NULL) {
-    offsetX = self->animationFrame * (float)self->currentAnimation->dimensions.x / self->texture->width;
+    offsetX = self->animationFrame * (float)self->currentAnimation->dimensions.x / 
+        self->texture->width;
     offsetY = self->currentAnimation->start.y / self->texture->height;
     scaleX = self->currentAnimation->dimensions.x / self->texture->width;
     scaleY = self->currentAnimation->dimensions.y / self->texture->height;
@@ -150,8 +146,8 @@ void Texture_DrawAt(Texture *self, Vec2 position) {
 
   Mat4_set_rotation(m.rotate, 0);
   // +50 hier ist eher sprite.width * sprite.scale / 2
-  Mat4_set_translation(
-      m.translate, position.x + self->width * globalScale / 2.0f, position.y + self->height * globalScale / 2.0f, 0);
+  Mat4_set_translation(m.translate, position.x + self->width * globalScale / 2.0f,
+      position.y + self->height * globalScale / 2.0f, 0);
   Mat4_set_scalation(m.scale, sizeX, -sizeY, 1); // TODO
 
   Mat4_multiply(m.rotate, m.scale, m.model);
@@ -179,7 +175,7 @@ PixelFont *PixelFont_New(Texture *texture, u8 frameWidth, u8 frameHeight) {
   return self;
 }
 
-void DrawCharacter(PixelFont *font, char c, Color color, int x, int y, u8 scale) {
+void _DrawCharacter(PixelFont *font, char c, Color color, int x, int y, u8 scale) {
   float sizeX = font->frameWidth / 100.0f * scale * globalScale; // WARUM DURCH 100 ???
   float sizeY = font->frameHeight / 100.0f * scale * globalScale;
 
@@ -213,7 +209,7 @@ void DrawCharacter(PixelFont *font, char c, Color color, int x, int y, u8 scale)
 
 void Engine_DrawText(PixelFont *font, Color color, char *Text, int x, int y, u8 scale) {
   for (int i = 0; Text[i]; i++) {
-    DrawCharacter(font, Text[i], color, x + scale * i * font->frameWidth, y, scale);
+    _DrawCharacter(font, Text[i], color, x + scale * i * font->frameWidth, y, scale);
   }
 }
 
@@ -254,24 +250,6 @@ void _Engine_CreatePolyVAO() {
   glBindVertexArray(0);             // unbinds the VAO
 }
 
-void Engine_DrawLine(Vec2 a, Vec2 b) {
-  float vertices[] = {a.x, a.y, 0, b.x, b.y, 0};
-
-  glUniform1i(recOnlyLoc, 1);
-  glUniform1i(animationFrameMaxLoc, 1);
-  glUniform1i(animationFrameLoc, 1);
-
-  float *unit = Mat4_CreateIdentity();
-  glUniformMatrix4fv(modelLoc, 1, GL_TRUE, unit);
-
-  glBindVertexArray(polyVAO);
-
-  glBindBuffer(GL_ARRAY_BUFFER, polyVBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW);
-
-  glDrawElements(GL_LINES, 3, GL_UNSIGNED_INT, 0);
-}
-
 Color _ColorHexToRGBA(const char *colorHex) {
   u8 len = strlen(colorHex);
   if (len != 6 && len != 8) {
@@ -285,6 +263,26 @@ Color _ColorHexToRGBA(const char *colorHex) {
     values[i] = ((u8) strtoul(buf, NULL, 16)) / 256.0f;
   }
   return (Color) {values[0], values[1],values[2], values[3]};
+}
+
+void Engine_DrawLine(const char *colorHex, Vec2 a, Vec2 b) {
+  float vertices[] = {a.x, a.y, 0, b.x, b.y, 0};
+
+  glUniform1i(recOnlyLoc, 1);
+  glUniform1i(animationFrameMaxLoc, 1);
+  glUniform1i(animationFrameLoc, 1);
+
+  float *unit = Mat4_CreateIdentity();
+  glUniformMatrix4fv(modelLoc, 1, GL_TRUE, unit);
+
+  glBindVertexArray(polyVAO);
+
+  glBindBuffer(GL_ARRAY_BUFFER, polyVBO);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW);
+  
+  Color color = _ColorHexToRGBA(colorHex);
+  glUniform4f(colorLoc, color.r, color.g, color.b, color.a);
+  glDrawElements(GL_LINES, 3, GL_UNSIGNED_INT, 0);
 }
 
 void Engine_DrawPolygon(const char *colorHex, int amount, ...) {
@@ -332,6 +330,7 @@ void Engine_DrawPolygon(const char *colorHex, int amount, ...) {
 
   /// use GL_TRIANGLE_FAN ?
   glDrawElements(GL_TRIANGLES, (amount - 2) * 3, GL_UNSIGNED_INT, 0);
+  free(unit);
 }
 
 Color Engine_GetRandomColor() {
