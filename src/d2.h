@@ -25,7 +25,7 @@ void Engine_Init();
 void Engine_OpenWindow(u32 width, u32 height, bool fullscreen);
 void Engine_Cleanup();
 void Engine_RunMainloop(void (*mainloopFunction)(void));
-void Engine_DrawPolygon(Color color, int amount, ...);
+void Engine_DrawPolygon(const char* colorHex, int amount, ...);
 void Engine_DrawLine(Vec2 a, Vec2 b);
 void Engine_DrawText(PixelFont *font, Color color, char *Text, int x, int y, u8 scale);
 void Engine_ResizeWindow(int w, int h);

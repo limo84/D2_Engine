@@ -272,7 +272,22 @@ void Engine_DrawLine(Vec2 a, Vec2 b) {
   glDrawElements(GL_LINES, 3, GL_UNSIGNED_INT, 0);
 }
 
-void Engine_DrawPolygon(Color color, int amount, ...) {
+Color _ColorHexToRGBA(const char *colorHex) {
+  u8 len = strlen(colorHex);
+  if (len != 6 && len != 8) {
+    printf("wrong color string\n");
+    return (Color){0, 0, 0, 1};
+  }
+  float values[4] = {1};
+  char buf[3];
+  for (int i = 0; i < len / 2; i++) {
+    strncpy(buf, colorHex + 2 * i, 2);
+    values[i] = ((u8) strtoul(buf, NULL, 16)) / 256.0f;
+  }
+  return (Color) {values[0], values[1],values[2], values[3]};
+}
+
+void Engine_DrawPolygon(const char *colorHex, int amount, ...) {
 
   // if (amount < 3) {
   //   //
@@ -299,6 +314,8 @@ void Engine_DrawPolygon(Color color, int amount, ...) {
 
   /* clean memory reserved for valist */
   va_end(valist);
+
+  Color color = _ColorHexToRGBA(colorHex);
 
   glUniform1i(recOnlyLoc, 1);
   glUniform1i(animationFrameMaxLoc, 1);
@@ -405,7 +422,8 @@ float Mouse_GetPositionX() { return mouse.x; }
 float Mouse_GetPositionY() { return mouse.y; }
 
 bool Mouse_IsInsideRect(Rect rect) {
-  return mouse.x >= rect.x && mouse.x <= rect.x + rect.w && mouse.y >= rect.y && mouse.y <= rect.y + rect.h;
+  return mouse.x >= rect.x && mouse.x <= rect.x + rect.w && 
+    mouse.y >= rect.y && mouse.y <= rect.y + rect.h;
 }
 
 void _Engine_InitMatrices() {
