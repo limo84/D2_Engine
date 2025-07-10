@@ -1,5 +1,8 @@
 
-test: test.c
+run:
+	make test && ./test
+
+test: test.c libd2.so
 	gcc test.c -o test libd2/libd2.so -I src/ -I vendor/
 
 
@@ -9,13 +12,14 @@ test: test.c
 # ----- LIBD2 -------------------------------------------------
 
 INCS := -I src/ -I vendor/
-OBJS_D2 := libd2/d2.o libd2/glad.o libd2/stb_image.o libd2/d2_sdl.o
+OBJS_D2 := libd2/d2.o libd2/glad.o libd2/stb_image.o libd2/d2_sdl.o libd2/d2_sprite.o
 
 libd2.so: $(OBJS_D2)
 	gcc -shared -o libd2/libd2.so $(OBJS_D2) -lSDL2 -lSDL2_mixer
 	rm libd2/*.o
 
 libd2/%.o: src/%.c src/*.h
+	mkdir -p libd2
 	gcc -g -c -fPIC $< -o $@ $(INCS)
 
 libd2/%.o: vendor/%.c src/*.h

@@ -4,17 +4,6 @@
 #include "d2_structs.h"
 #include "types.h"
 
-// #include <SDL2/SDL.h>
-// #include <SDL2/SDL_events.h>
-// #include <SDL2/SDL_keycode.h>
-// #include <SDL2/SDL_rect.h>
-// #include <SDL2/SDL_scancode.h>
-// #include <SDL2/SDL_stdinc.h>
-// #include <SDL2/SDL_timer.h>
-// #include <SDL2/SDL_video.h>
-
-// #include <GLFW_3_4/glfw3.h>
-// #include <SDL2/SDL_timer.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
