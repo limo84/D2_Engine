@@ -285,6 +285,34 @@ void Engine_DrawLine(const char *colorHex, Vec2 a, Vec2 b) {
   glDrawElements(GL_LINES, 3, GL_UNSIGNED_INT, 0);
 }
 
+void Engine_DrawRectangle(const char *colorHex, Rect rect) {
+  float sizeX = rect.w / 100.0f * globalScale;
+  float sizeY = rect.h / 100.0f * globalScale;
+
+  Mat4_set_rotation(m.rotate, 0);
+  // +50 hier ist eher sprite.width * sprite.scale / 2
+  Mat4_set_translation(m.translate, rect.x + rect.w * globalScale / 2.0f,
+      rect.y + rect.h * globalScale / 2.0f, 0);
+  Mat4_set_scalation(m.scale, sizeX, -sizeY, 1); // TODO
+
+  Mat4_multiply(m.rotate, m.scale, m.model);
+  Mat4_multiply(m.translate, m.model, m.model);
+
+  glUniform1i(recOnlyLoc, 1);
+  glUniform1i(animationFrameMaxLoc, 1);
+  glUniform1i(animationFrameLoc, 1);
+  
+  Color color = _ColorHexToRGBA(colorHex);
+  glUniform4f(colorLoc, color.r, color.g, color.b, color.a);
+
+  // glUniform1i(flipTextureLoc, self->flipTextureX);
+
+  //glBindTexture(GL_TEXTURE_2D, self->id);
+  glUniformMatrix4fv(modelLoc, 1, GL_TRUE, m.model);
+  glBindVertexArray(VAO);
+  glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+}
+
 void Engine_DrawPolygon(const char *colorHex, int amount, ...) {
 
   // if (amount < 3) {
