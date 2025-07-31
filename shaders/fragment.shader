@@ -30,7 +30,7 @@ void main()
   // vec2 qwe = vec2(0.5, 0.5);
 
   if (recOnly == 1) {
-    FragColor = vec4(shaderColor.rgb, 0.1f);
+    FragColor = vec4(shaderColor.rgba);
   } else {
     // FragColor = texture(ourTexture, vec2((TexCoord.x + animationFrame) / animationFrameMax, TexCoord.y)) * shaderColor;
     // vec3 asd = matrix * vec3(TexCoord.x + 0.5, TexCoord.y + 0.5, 1.0f);

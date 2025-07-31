@@ -11,9 +11,9 @@
 
 void mainloop() {
   Rect rect = {200, 100, 400, 400};
-  Engine_DrawRectangle("00ff00", rect);
-  Engine_DrawLine("ffffff", (Vec2) {100, 100}, (Vec2) {1000, 1000});
-  Engine_DrawPolygon("ab231f", 3, (Vec2){100, 100}, (Vec2){500, 100}, (Vec2){500, 300});
+  Engine_DrawRectangle("00ff00ff", rect);
+  Engine_DrawLine("ffffffff", (Vec2) {100, 100}, (Vec2) {1000, 1000});
+  Engine_DrawPolygon("ab231fff", 3, (Vec2){100, 100}, (Vec2){500, 100}, (Vec2){500, 300});
 }
 
 int main() {

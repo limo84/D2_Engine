@@ -260,7 +260,7 @@ Color _ColorHexToRGBA(const char *colorHex) {
   char buf[3];
   for (int i = 0; i < len / 2; i++) {
     strncpy(buf, colorHex + 2 * i, 2);
-    values[i] = ((u8) strtoul(buf, NULL, 16)) / 256.0f;
+    values[i] = ((u8) strtoul(buf, NULL, 16)) / 255.0f;
   }
   return (Color) {values[0], values[1],values[2], values[3]};
 }
