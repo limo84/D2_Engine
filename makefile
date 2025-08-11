@@ -2,8 +2,8 @@
 run:
 	make test && ./test
 
-test: test.c libd2.so
-	gcc test.c -o test libd2/libd2.so -I src/ -I vendor/
+test: test.c libd2/libd2.a
+	gcc test.c -o test libd2/libd2.a -I src/ -I vendor/ -lm -lSDL2 -lSDL2_mixer
 
 
 #################################################################
@@ -39,15 +39,15 @@ hotwindow: d2_hotwindow.c libd2.so
 #                     STATIC LIBS                               #
 #################################################################
 
-install: lib lib/d2.o lib/glad.o lib/stb_image.o
-	ar rcs lib/libd2.a lib/d2.o lib/glad.o lib/stb_image.o
-	sudo cp lib/libd2.a /usr/local/lib/libd2.a
-	sudo cp -r include /usr/local/include/d2/
-	rm -rf lib
+HEADERS := src/*.h vendor/*.h
+
+install: libd2 $(OBJS_D2)
+	ar rcs libd2/libd2.a $(OBJS_D2)
+	sudo cp libd2/libd2.a /usr/local/lib/libd2.a
+	sudo mkdir -p /usr/local/include/d2
+	sudo cp $(HEADERS) /usr/local/include/d2/
 
 uninstall:
 	sudo rm -rf /usr/local/lib/libd2.a
 	sudo rm -rf /usr/local/include/d2/
 
-lib:
-	mkdir -p lib

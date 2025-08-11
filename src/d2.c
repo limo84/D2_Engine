@@ -2,7 +2,6 @@
 #include "d2_keys.h"
 #include "d2_priv.h"
 #include "d2_structs.h"
-#include "types.h"
 
 #include <math.h>
 #include <stdbool.h>

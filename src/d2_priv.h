@@ -1,10 +1,8 @@
 #pragma once
 
-// #include <GLFW_3_4/glfw3.h>
-// #include <SDL2/SDL.h>
 #include <stdbool.h>
 
-#include "types.h"
+#include "d2_structs.h"
 
 typedef struct {
   float *projection; // converts clipping space to screen coords

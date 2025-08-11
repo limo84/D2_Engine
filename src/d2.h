@@ -1,23 +1,14 @@
 #pragma once
 
-// #include <SDL2/SDL.h>
-// #include <SDL2/SDL_events.h>
-// #include <SDL2/SDL_rect.h>
-// #include <SDL2/SDL_scancode.h>
-// #include <SDL2/SDL_stdinc.h>
-// #include <SDL2/SDL_video.h>
-
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
 
 #include "glad.h"
-// #include <GLFW_3_4/glfw3.h>
 
 #include "d2_structs.h"
 #include "stb_image.h"
 #include "stb_truetype.h"
-#include "types.h"
 
 #define ANIMATION_NAME_LENGTH
 
@@ -53,7 +44,7 @@ void Texture_Free(Texture *texture);
 void Texture_DrawAt(Texture *texture, Vec2 position);
 
 Button *Button_New(Texture *texture, Rect src, Rect dest, void (*OnMouseEnter)(Button *self),
-    void (*OnMouseLeave)(Button *self), void (*OnClick)(Button *self, void *data));
+void (*OnMouseLeave)(Button *self), void (*OnClick)(Button *self, void *data));
 void Button_Update(Button *self, void *data);
 void Button_Draw(Button *self);
 
