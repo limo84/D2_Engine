@@ -1,9 +1,21 @@
 
-run:
-	make test && ./test
+#run:
+#	make test && ./test
 
 test: test.c libd2/libd2.a
-	gcc test.c -o test libd2/libd2.a -I src/ -I vendor/ -lm -lSDL2 -lSDL2_mixer
+	gcc test.c -o test libd2/libd2.a -I src/ -I vendor/ -L lib/ -lm -lSDL2 -lSDL2_mixer \
+	-lmingw32 \
+	-mwindows \
+	-lsetupapi \
+	-limm32 \
+	-lole32 \
+	-loleaut32 \
+	-lcomdlg32 \
+	-luser32 \
+	-lgdi32 \
+	-lwinmm \
+	-lversion \
+	-luuid
 
 
 #################################################################
@@ -19,14 +31,11 @@ libd2.so: $(OBJS_D2)
 	rm libd2/*.o
 
 libd2/%.o: src/%.c src/*.h
-	mkdir -p libd2
 	gcc -g -c -fPIC $< -o $@ $(INCS)
 
 libd2/%.o: vendor/%.c src/*.h
 	gcc -g -c -fPIC $< -o $@ $(INCS)
 
-libd2:
-	mkdir -p libd2
 
 
 # ----------------------------------------------------------------
@@ -43,9 +52,11 @@ HEADERS := src/*.h vendor/*.h
 
 install: libd2 $(OBJS_D2)
 	ar rcs libd2/libd2.a $(OBJS_D2)
-	sudo cp libd2/libd2.a /usr/local/lib/libd2.a
-	sudo mkdir -p /usr/local/include/d2
-	sudo cp $(HEADERS) /usr/local/include/d2/
+
+
+#sudo cp libd2/libd2.a /usr/local/lib/libd2.a
+#sudo mkdir -p /usr/local/include/d2
+#sudo cp $(HEADERS) /usr/local/include/d2/
 
 uninstall:
 	sudo rm -rf /usr/local/lib/libd2.a

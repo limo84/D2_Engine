@@ -57,7 +57,7 @@ void _Backend_CreateWindow(u32 width, u32 height, bool fullscreen) {
   }
 
   // SET MONITOR
-  int useDisplay = 0; // which monitor to use
+  int useDisplay = 1; // which monitor to use
   int displays = SDL_GetNumVideoDisplays();
   printf("displays: %d\n", displays);
 
@@ -69,8 +69,9 @@ void _Backend_CreateWindow(u32 width, u32 height, bool fullscreen) {
 
   SDL_Window *window = NULL;
   Uint32 flags = SDL_WINDOW_OPENGL | (fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
-  window = SDL_CreateWindow("D2_Engine", displayBounds[useDisplay].x, displayBounds[useDisplay].y,
-      width, height, flags);
+  //window = SDL_CreateWindow("D2_Engine", displayBounds[useDisplay].x, displayBounds[useDisplay].y,
+  //    width, height, flags);
+  window = SDL_CreateWindow("D2_Engine", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, flags);
 
   if (!window) {
     printf("ERROR: Window init failed\n");
