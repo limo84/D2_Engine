@@ -3,6 +3,8 @@
 #include "d2_priv.h"
 #include "d2_structs.h"
 
+#include "glad.h"
+
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -67,6 +69,10 @@ void Engine_OpenWindow(u32 width, u32 height, bool fullscreen) {
   _Engine_InitMatrices();
   _Engine_InitUniformLocs();
 }
+
+
+
+
 
 void Engine_RunMainloop(void (*mainloopFunction)(void)) {
 
@@ -708,7 +714,7 @@ char *readShaderFileToString(char *fileName) {
   char *buffer = 0;
   int length;
 
-  file = fopen(fileName, "r");
+  file = fopen(fileName, "rb");
 
   printf("Read shader: %s\n", fileName);
 

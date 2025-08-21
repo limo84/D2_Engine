@@ -90,6 +90,7 @@ void _Backend_CreateWindow(u32 width, u32 height, bool fullscreen) {
   printf("Renderer: %s\n", glGetString(GL_RENDERER));
   printf("Version: %s\n", glGetString(GL_VERSION));
   printf("Shading Language: %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
+  fflush(stdout);
 
   free(displayBounds);
 

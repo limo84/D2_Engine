@@ -2,8 +2,25 @@
 #run:
 #	make test && ./test
 
-test: test.c libd2/libd2.a
-	gcc test.c -o test libd2/libd2.a -I src/ -I vendor/ -L lib/ -lm -lSDL2 -lSDL2_mixer \
+# test: test.c libd2/libd2.a
+# 	gcc test.c -o test libd2/libd2.a -I src/ -I vendor/ -L lib/ -lm -lSDL2 -lSDL2_mixer \
+# 	-lmingw32 \
+# 	-mwindows \
+# 	-lsetupapi \
+# 	-limm32 \
+# 	-lole32 \
+# 	-loleaut32 \
+# 	-lcomdlg32 \
+# 	-luser32 \
+# 	-lgdi32 \
+# 	-lwinmm \
+# 	-lversion \
+# 	-luuid
+
+
+SRC := src/*.c vendor/*.c
+test2: test.c $(SRC)
+	gcc test.c $(SRC) -o test -I src/ -I vendor/ -L lib/ -lm -lSDL2 -lSDL2_mixer \
 	-lmingw32 \
 	-mwindows \
 	-lsetupapi \
