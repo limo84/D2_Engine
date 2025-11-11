@@ -1,6 +1,6 @@
 
-#run:
-#	make test && ./test
+# run:
+# 	make test2 && ./test
 
 # test: test.c libd2/libd2.a
 # 	gcc test.c -o test libd2/libd2.a -I src/ -I vendor/ -L lib/ -lm -lSDL2 -lSDL2_mixer \
@@ -34,11 +34,10 @@ test2: test.c $(SRC)
 	-lversion \
 	-luuid
 
-
 #################################################################
 #                     SHARED LIBS                               #
 #################################################################
-# ----- LIBD2 -------------------------------------------------
+# ----- LIBD2 ---------------------------------------------------
 
 INCS := -I src/ -I vendor/
 OBJS_D2 := libd2/d2.o libd2/glad.o libd2/stb_image.o libd2/d2_sdl.o libd2/d2_sprite.o
@@ -53,13 +52,10 @@ libd2/%.o: src/%.c src/*.h
 libd2/%.o: vendor/%.c src/*.h
 	gcc -g -c -fPIC $< -o $@ $(INCS)
 
-
-
 # ----------------------------------------------------------------
 
 hotwindow: d2_hotwindow.c libd2.so
 	gcc -g d2_hotwindow.c -o window -I src/ -I vendor/ $(CFLAGS) libd2/libd2.so
-
 
 #################################################################
 #                     STATIC LIBS                               #
@@ -70,7 +66,6 @@ HEADERS := src/*.h vendor/*.h
 install: libd2 $(OBJS_D2)
 	ar rcs libd2/libd2.a $(OBJS_D2)
 
-
 #sudo cp libd2/libd2.a /usr/local/lib/libd2.a
 #sudo mkdir -p /usr/local/include/d2
 #sudo cp $(HEADERS) /usr/local/include/d2/
@@ -78,4 +73,3 @@ install: libd2 $(OBJS_D2)
 uninstall:
 	sudo rm -rf /usr/local/lib/libd2.a
 	sudo rm -rf /usr/local/include/d2/
-
