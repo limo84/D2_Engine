@@ -51,10 +51,10 @@ void _Backend_CreateWindow(u32 width, u32 height, bool fullscreen) {
     exit(-1);
   }
 
-  if ((music = Mix_LoadMUS("assets/nightmare.wav")) == NULL) {
-    printf("Could not load music file: %s\n", Mix_GetError());
-    exit(-1);
-  }
+  // if ((music = Mix_LoadMUS("assets/nightmare.wav")) == NULL) {
+  //   printf("Could not load music file: %s\n", Mix_GetError());
+  //   exit(-1);
+  // }
 
   // SET MONITOR
   int useDisplay = 1; // which monitor to use
@@ -98,7 +98,7 @@ void _Backend_CreateWindow(u32 width, u32 height, bool fullscreen) {
 }
 
 void Audio_PlayMusic() {
-  Mix_PlayMusic(music, -1);
+  // Mix_PlayMusic(music, -1);
 }
 
 void _Backend_HandleEvents() {
