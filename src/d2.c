@@ -11,6 +11,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "shaders.h"
+
 #define PI 3.14159265
 
 int window_width;
@@ -59,7 +61,8 @@ void Engine_OpenWindow(u32 width, u32 height, bool fullscreen) {
   _Engine_CreateQuadVAO();
   _Engine_CreatePolyVAO();
 
-  shader = Shader_New("shaders/vertex.shader", "shaders/fragment.shader");
+  // shader = Shader_New("shaders/vertex.shader", "shaders/fragment.shader");
+  shader = Shader_New("shaders\\vertex.shader", "shaders\\fragment.shader");
   glEnable(GL_BLEND);
   glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
   glUseProgram(shader);
@@ -709,7 +712,7 @@ void Sprite_DrawHitbox(Sprite *self) {
 //   glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 // }
 
-char *readShaderFileToString(char *fileName) {
+char *readShaderFileToString(const char *fileName) {
   FILE *file = NULL;
   char *buffer = 0;
   int length;
@@ -742,12 +745,12 @@ char *readShaderFileToString(char *fileName) {
 unsigned int Shader_New(const char *vertexPath, const char *fragmentPath) {
   unsigned int shader;
 
-  const char *vertexShaderSource = readShaderFileToString("shaders/vertex.shader");
-  const char *fragmentShaderSource = readShaderFileToString("shaders/fragment.shader");
+  // const char *vertexShaderSource = readShaderFileToString(vertexPath);
+  // const char *fragmentShaderSource = readShaderFileToString(fragmentPath);
 
   // create vertex shader
   unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-  glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
+  glShaderSource(vertexShader, 1, &defaultVertex, NULL);
   glCompileShader(vertexShader);
 
   // error checking
@@ -762,7 +765,7 @@ unsigned int Shader_New(const char *vertexPath, const char *fragmentPath) {
 
   // create fragment shader
   unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-  glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
+  glShaderSource(fragmentShader, 1, &defaultFragment, NULL);
   glCompileShader(fragmentShader);
 
   // error checking (maybe clear infolog?)
@@ -789,8 +792,8 @@ unsigned int Shader_New(const char *vertexPath, const char *fragmentPath) {
   glDeleteShader(vertexShader);
   glDeleteShader(fragmentShader);
 
-  free((void *)vertexShaderSource);
-  free((void *)fragmentShaderSource);
+  // free((void *)vertexShaderSource);
+  // free((void *)fragmentShaderSource);
 
   return shader;
 }
