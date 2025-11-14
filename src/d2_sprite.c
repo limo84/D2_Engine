@@ -26,7 +26,7 @@ Sprite *Sprite_New(Texture *texture, u32 x, u32 y) {
 
   self->animationsAmount = 0;
   self->animations = NULL;
-//   self->animation[0] = (Animation){{0, 0}, {texture->width, texture->height}, 1};
+  // self->animations[0] = (Animation){{0, 0}, {texture->width, texture->height}, 1};
   return self;
 }
 

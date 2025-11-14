@@ -9,6 +9,7 @@
 #include "d2_structs.h"
 #include "stb_image.h"
 #include "stb_truetype.h"
+#include "lsh_logger.h"
 
 #define ANIMATION_NAME_LENGTH
 

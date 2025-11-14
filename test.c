@@ -9,16 +9,34 @@
 
 #include "src/d2.h"
 
+Sprite *sprite = NULL;
+
 void mainloop() {
+  Sprite_Update(sprite);
   Rect rect = {200, 100, 400, 400};
   Engine_DrawRectangle("00ff00ff", rect);
   Engine_DrawLine("ffffffff", (Vec2) {100, 100}, (Vec2) {1000, 1000});
   Engine_DrawPolygon("ab231fff", 3, (Vec2){100, 100}, (Vec2){500, 100}, (Vec2){500, 300});
+  Sprite_Draw(sprite);
 }
 
 int main() {
   Engine_Init();
   Engine_OpenWindow(800, 600, false);
+
+  // LOAD A TEXTURE
+  Texture *texture = NULL;
+  char fileName[256];
+  sprintf(fileName, "assets/tex_player.png");
+  texture = Texture_LoadFromFile(fileName);
+  if (texture == NULL) {
+    logger_log("huhu");
+    exit(0);
+  }
+  // CREATE A SPRITE
+  sprite = Sprite_New(texture, 200, 200);
+
+  // MAIN LOOP
   Engine_RunMainloop(mainloop);
   return 0;
 }

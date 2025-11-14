@@ -1,17 +1,17 @@
+#define LSH
+#include "lsh_logger.h"
 #include "d2.h"
 #include "d2_keys.h"
 #include "d2_priv.h"
 #include "d2_structs.h"
-
 #include "glad.h"
+#include "shaders.h"
 
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include "shaders.h"
 
 #define PI 3.14159265
 
@@ -40,7 +40,7 @@ Mouse mouse;
 Mouse oldMouse;
 
 float cameraPosX = 0;
-
+char *path;
 // Timer *fpsTimer;
 
 // Engine *engine;
@@ -52,6 +52,11 @@ float globalScale = 1.0;
 void Engine_Init() {}
 
 void Engine_OpenWindow(u32 width, u32 height, bool fullscreen) {
+
+  path = SDL_GetBasePath();
+  logger_set_filename("d2log.log");
+  logger_log("logging works in d2...\n");
+  logger_log("PATH1: %s\n", path);
 
   window_width = width;   // TODO remove
   window_height = height; // TODO remove
@@ -72,10 +77,6 @@ void Engine_OpenWindow(u32 width, u32 height, bool fullscreen) {
   _Engine_InitMatrices();
   _Engine_InitUniformLocs();
 }
-
-
-
-
 
 void Engine_RunMainloop(void (*mainloopFunction)(void)) {
 
@@ -445,9 +446,7 @@ void Timer_Reset(Timer *self, u64 millis) {
   self->currentTime = millis;
 }
 
-// bool Engine_GetEngine_key_pressed(SDL_Scancode code) {
-//   return oldKeys[code] && keys[code];
-// }
+
 bool Engine_GetKeyPressedOnce(int key) { return !oldKeys[key] && keys[key]; }
 
 bool Mouse_GetPressed(int button) { return mouse.button[button]; }
@@ -544,6 +543,8 @@ void print_transform_locs() {
 }
 
 Texture *Texture_LoadFromFile(char const *filename) {
+  logger_log("PATH1: %s\n", path);
+  logger_log("PATH1: %s\n", filename);
   Texture *self = (Texture *)malloc(sizeof(Texture));
   // unsigned int texture;
   glGenTextures(1, &self->id);
@@ -567,11 +568,12 @@ Texture *Texture_LoadFromFile(char const *filename) {
   stbi_set_flip_vertically_on_load(1); // TODO call only once?
   unsigned char *data = stbi_load(filename, &self->width, &self->height, &nrChannels, 0);
   if (data) {
-    printf("Loaded TEXTURE: %s. Width: %d, Height: %d\n", filename, self->width, self->height);
+    logger_log("Loaded TEXTURE: %s. Width: %d, Height: %d\n", filename, self->width, self->height);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, self->width, self->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
     glGenerateMipmap(GL_TEXTURE_2D);
   } else {
-    printf("TEXTURE failed: %s\n", filename);
+    logger_log("TEXTURE failed: %s\n", filename);
+    return NULL;
   }
   stbi_image_free(data);
 
