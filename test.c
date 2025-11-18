@@ -10,19 +10,22 @@
 #include "src/d2.h"
 
 Sprite *sprite = NULL;
+Sprite *sprite2 = NULL;
+Rect rect = {400, 100, 400, 400};
+
 
 void mainloop() {
-  Sprite_Update(sprite);
-  Rect rect = {200, 100, 400, 400};
   Engine_DrawRectangle("00ff00ff", rect);
-  Engine_DrawLine("ffffffff", (Vec2) {100, 100}, (Vec2) {1000, 1000});
-  Engine_DrawPolygon("ab231fff", 3, (Vec2){100, 100}, (Vec2){500, 100}, (Vec2){500, 300});
+  Sprite_Update(sprite);
+  // Engine_DrawLine("ffffffff", (Vec2) {100, 100}, (Vec2) {1000, 1000});
+  // Engine_DrawPolygon("ab231fff", 3, (Vec2){100, 100}, (Vec2){500, 100}, (Vec2){500, 300});
+  Sprite_Draw(sprite2);
   Sprite_Draw(sprite);
 }
 
 int main() {
   Engine_Init();
-  Engine_OpenWindow(800, 600, false);
+  Engine_OpenWindow(1920, 1080, true);
 
   // LOAD A TEXTURE
   Texture *texture = NULL;
@@ -35,6 +38,16 @@ int main() {
   }
   // CREATE A SPRITE
   sprite = Sprite_New(texture, 200, 200);
+
+  // LOAD A TEXTURE
+  sprintf(fileName, "assets/tex_GOL_StartButton.png");
+  texture = Texture_LoadFromFile(fileName);
+  if (texture == NULL) {
+    logger_log("huhu");
+    exit(0);
+  }
+  // CREATE A SPRITE
+  sprite2 = Sprite_New(texture, 200, 150);
 
   // MAIN LOOP
   Engine_RunMainloop(mainloop);

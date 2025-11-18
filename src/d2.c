@@ -115,10 +115,7 @@ void Sprite_DrawAt(Sprite *self, Vec2 position, float rotation) {
   Mat4_multiply(m.rotate, m.scale, m.model);
   Mat4_multiply(m.translate, m.model, m.model);
 
-  // Mat4_print("asd", m.rotate);
-  // Mat4_print("model", m.model);
-
-  // glUniform1i(recOnlyLoc, 0);
+  glUniform1i(recOnlyLoc, 0);
   // glUniform1i(animationFrameMaxLoc, self->animation.frames);
   // glUniform1i(animationFrameLoc, self->animationFrame);
   float offsetX = 0;
@@ -134,14 +131,9 @@ void Sprite_DrawAt(Sprite *self, Vec2 position, float rotation) {
     scaleY = self->currentAnimation->dimensions.y / self->texture->height;
   }
 
-  // printf("scales %f, %f\n", scaleX, scaleY);
   glUniform4f(texOffsetLoc, offsetX, offsetY, scaleX, scaleY);
-
   float alpha = self->alpha;
   glUniform4f(colorLoc, alpha, alpha, alpha, alpha);
-  // glUniform4f(colorLoc, 1, 1, 1, self->texture->alpha);
-
-  // glUniform1i(flipTextureLoc, self->flipTextureX);
 
   glBindTexture(GL_TEXTURE_2D, self->texture->id);
   glUniformMatrix4fv(modelLoc, 1, GL_TRUE, m.model);
@@ -167,7 +159,6 @@ void Texture_DrawAt(Texture *self, Vec2 position) {
   glUniform1i(animationFrameMaxLoc, 1);
   glUniform1i(animationFrameLoc, 1);
   glUniform4f(colorLoc, 1, 1, 1, 1);
-  // glUniform1i(flipTextureLoc, self->flipTextureX);
 
   glBindTexture(GL_TEXTURE_2D, self->id);
   glUniformMatrix4fv(modelLoc, 1, GL_TRUE, m.model);
