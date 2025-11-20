@@ -17,15 +17,15 @@ Rect rect = {400, 100, 400, 400};
 void mainloop() {
   Engine_DrawRectangle("00ff00ff", rect);
   Sprite_Update(sprite);
-  // Engine_DrawLine("ffffffff", (Vec2) {100, 100}, (Vec2) {1000, 1000});
-  // Engine_DrawPolygon("ab231fff", 3, (Vec2){100, 100}, (Vec2){500, 100}, (Vec2){500, 300});
+  Engine_DrawLine("ffffffff", (Vec2) {100, 100}, (Vec2) {1000, 1000});
+  Engine_DrawPolygon("ab231fff", 3, (Vec2){100, 100}, (Vec2){500, 100}, (Vec2){500, 300});
   Sprite_Draw(sprite2);
   Sprite_Draw(sprite);
 }
 
 int main() {
   Engine_Init();
-  Engine_OpenWindow(1920, 1080, true);
+  Engine_OpenWindow(800, 600, false);
 
   // LOAD A TEXTURE
   Texture *texture = NULL;
