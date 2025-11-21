@@ -5,7 +5,7 @@
 #include "d2_priv.h"
 #include "d2_structs.h"
 #include "glad.h"
-#include "shaders.h"
+#include "shaders.hh"
 
 #include <math.h>
 #include <stdbool.h>
