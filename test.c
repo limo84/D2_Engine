@@ -24,7 +24,7 @@ void mainloop() {
 
 int main() {
   Engine_Init();
-  Engine_OpenWindow(1920, 1080, true);
+  Engine_OpenWindow(800, 600, false);
 
   // LOAD A TEXTURE
   Texture *texture = NULL;
