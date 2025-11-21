@@ -58,47 +58,37 @@ bool e_released = true;
 
 float globalScale = 1.0;
 
+unsigned int _defaultShader();
+
 void Engine_Init() {}
 
 void Engine_OpenWindow(u32 width, u32 height, bool fullscreen) {
-
   path = SDL_GetBasePath();
+  window_width = width;   // TODO remove
+  window_height = height; // TODO remove
   logger_set_filename("d2log.log");
   logger_log("logging works in d2...\n");
   logger_log("PATH1: %s\n", path);
-
-  window_width = width;   // TODO remove
-  window_height = height; // TODO remove
-
   _Backend_CreateWindow(width, height, fullscreen);
-
   _Engine_CreateQuadVAO();
   _Engine_CreatePolyVAO();
-
-  // shader = Shader_New("shaders/vertex.shader", "shaders/fragment.shader");
-  ogl.shader = Shader_New("shaders\\vertex.shader", "shaders\\fragment.shader");
+  ogl.shader = _defaultShader();
   glEnable(GL_BLEND);
   glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
   glUseProgram(ogl.shader);
-
   srand(1);
-
   _Engine_InitMatrices();
   _Engine_InitUniformLocs();
 }
 
 void Engine_RunMainloop(void (*mainloopFunction)(void)) {
-
   _Backend_InitTime();
-
   while (Engine_GetIsRunning()) {
     _Backend_HandleEvents();
     _Backend_CalculateDelta();
-
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
     mainloopFunction();
-
     _Backend_SwapBuffers();
     Engine_UpdateOldKeys();
     oldMouse = mouse;
@@ -110,23 +100,18 @@ void Sprite_Draw(Sprite *self) { Sprite_DrawAt(self, self->position, self->rotat
 void Sprite_DrawAt(Sprite *self, Vec2 position, float rotation) {
   float sizeX = (self->flipTextureX ? -1 : 1) * self->width / 100.0f * globalScale;
   float sizeY = (self->flipTextureY ? 1 : -1) * self->height / 100.0f * globalScale;
-
   Mat4_set_rotation(m.rotate, Engine_DegreeToRadians(rotation));
   // +50 hier ist eher sprite.width * sprite.scale / 2
   Mat4_set_translation(m.translate, position.x + self->width * globalScale / 2.0f,
       position.y + self->height * globalScale / 2.0f, 0);
   Mat4_set_scalation(m.scale, sizeX, -sizeY, 1); // TODO
-
   Mat4_multiply(m.rotate, m.scale, m.model);
   Mat4_multiply(m.translate, m.model, m.model);
-
   glUniform1i(ogl.locations.recOnly, 0);
-
   float offsetX = 0;
   float offsetY = 0;
   float scaleX = 1;
   float scaleY = 1;
-
   if (self->currentAnimation != NULL) {
     offsetX = self->animationFrame * (float)self->currentAnimation->dimensions.x / 
         self->texture->width;
@@ -134,11 +119,9 @@ void Sprite_DrawAt(Sprite *self, Vec2 position, float rotation) {
     scaleX = self->currentAnimation->dimensions.x / self->texture->width;
     scaleY = self->currentAnimation->dimensions.y / self->texture->height;
   }
-
-  glUniform4f(ogl.locations.texOffset, offsetX, offsetY, scaleX, scaleY);
   float alpha = self->alpha;
+  glUniform4f(ogl.locations.texOffset, offsetX, offsetY, scaleX, scaleY);
   glUniform4f(ogl.locations.color, alpha, alpha, alpha, alpha);
-
   glBindTexture(GL_TEXTURE_2D, self->texture->id);
   glUniformMatrix4fv(ogl.locations.model, 1, GL_TRUE, m.model);
   glBindVertexArray(ogl.VAO);
@@ -724,71 +707,95 @@ char *readShaderFileToString(const char *fileName) {
   return buffer;
 }
 
-unsigned int Shader_New(const char *vertexPath, const char *fragmentPath) {
+unsigned int _defaultShader() {
   unsigned int shader;
-
-  // const char *vertexShaderSource = readShaderFileToString(vertexPath);
-  // const char *fragmentShaderSource = readShaderFileToString(fragmentPath);
-
   // create vertex shader
   unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
   glShaderSource(vertexShader, 1, &defaultVertex, NULL);
   glCompileShader(vertexShader);
-
-  // error checking
+  // error checking [needed?]
   int success;
   char infoLog[512];
-
   glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
   if (!success) {
     glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
     printf("ERROR::SHADER::VERTEX::COMPILATION_FAILED\n%s\n", infoLog);
   }
-
   // create fragment shader
   unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
   glShaderSource(fragmentShader, 1, &defaultFragment, NULL);
   glCompileShader(fragmentShader);
-
-  // error checking (maybe clear infolog?)
+  // error checking
   glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
   if (!success) {
     glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
     printf("ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n%s\n", infoLog);
   }
-
   // create shader program and link shaders
   shader = glCreateProgram();
   glAttachShader(shader, vertexShader);
   glAttachShader(shader, fragmentShader);
   glLinkProgram(shader);
-
   // check for linking errors
   glGetProgramiv(shader, GL_LINK_STATUS, &success);
   if (!success) {
     glGetProgramInfoLog(shader, 512, NULL, infoLog);
     printf("ERROR::SHADER::PROGRAM::LINKING_FAILED\n%s\n", infoLog);
   }
-
   // since they are in program now, we no longer need the shaders..
   glDeleteShader(vertexShader);
   glDeleteShader(fragmentShader);
+  return shader;
+}
 
-  // free((void *)vertexShaderSource);
-  // free((void *)fragmentShaderSource);
 
+unsigned int Shader_New(const char *vertexPath, const char *fragmentPath) {
+  unsigned int shader;
+  const char *vertexShaderSource = readShaderFileToString(vertexPath);
+  const char *fragmentShaderSource = readShaderFileToString(fragmentPath);
+  // create vertex shader
+  unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
+  glShaderSource(vertexShader, 1, &defaultVertex, NULL);
+  glCompileShader(vertexShader);
+  // error checking
+  int success;
+  char infoLog[512];
+  glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+  if (!success) {
+    glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
+    printf("ERROR::SHADER::VERTEX::COMPILATION_FAILED\n%s\n", infoLog);
+  }
+  // create fragment shader
+  unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+  glShaderSource(fragmentShader, 1, &defaultFragment, NULL);
+  glCompileShader(fragmentShader);
+  // error checking
+  // memset(infoLog, 0, 512);
+  glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
+  if (!success) {
+    glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
+    printf("ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n%s\n", infoLog);
+  }
+  // create shader program and link shaders
+  shader = glCreateProgram();
+  glAttachShader(shader, vertexShader);
+  glAttachShader(shader, fragmentShader);
+  glLinkProgram(shader);
+  // check for linking errors
+  glGetProgramiv(shader, GL_LINK_STATUS, &success);
+  if (!success) {
+    glGetProgramInfoLog(shader, 512, NULL, infoLog);
+    printf("ERROR::SHADER::PROGRAM::LINKING_FAILED\n%s\n", infoLog);
+  }
+  // since they are in program now, we no longer need the shaders..
+  glDeleteShader(vertexShader);
+  glDeleteShader(fragmentShader);
+  free((void *)vertexShaderSource);
+  free((void *)fragmentShaderSource);
   return shader;
 }
 
 void _Engine_CreateQuadVAO() {
-  // float vertices[] = {
-  //     // pos            // texture
-  //     0.0f,   0.0f,   0.0f, 0.0f, 0.0f, // bottom left
-  //     100.0f, 0.0f,   0.0f, 1.0f, 0.0f, // bottom right
-  //     100.0f, 100.0f, 0.0f, 1.0f, 1.0f, // top right
-  //     0.0f,   100.0f, 0.0f, 0.0f, 1.0f  // top left
-  // };
-
   float vertices[] = {
       // pos                            // texture
       -50.0f, -50.0f, 0.0f, 0.0f, 0.0f, // bottom left
@@ -796,12 +803,10 @@ void _Engine_CreateQuadVAO() {
       50.0f, 50.0f, 0.0f, 1.0f, 1.0f,   // top right
       -50.0f, 50.0f, 0.0f, 0.0f, 1.0f   // top left
   };
-
   unsigned int indices[] = {
       0, 1, 2, // first triangle
       0, 2, 3  // second triangle
   };
-
   glGenVertexArrays(1, &ogl.VAO); // generates 1 buffer for the VAO
   glGenBuffers(1, &ogl.VBO);      // generates 1 buffer for the VBO
   glGenBuffers(1, &ogl.EBO);      // generates 1 buffer for the EBO
