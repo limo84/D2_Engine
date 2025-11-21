@@ -2,6 +2,7 @@
 
 #include "d2.h"
 #include "d2_keys.h"
+#include "d2_priv.h"
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_events.h>
@@ -35,6 +36,10 @@ bool vsyncEnabled = 1; // TODO
 u8 mon = 1;            // TODO
 
 Mix_Music *music;
+
+extern int window_width;
+extern int window_height;
+extern float globalScale;
 
 void _Backend_CreateWindow(u32 width, u32 height, bool fullscreen) {
 
@@ -109,20 +114,15 @@ void _Backend_HandleEvents() {
 
     switch (event.type) {
 
-      // case SDL_WINDOWEVENT: {
-      //   if (engine->event.window.event == SDL_WINDOWEVENT_RESIZED) {
-      //     // printf("w: %d, h: %d\n", window_width, window_height);
-      //     // Mat4_print("proj", m.projection);
-      //     window_width = engine->event.window.data1;
-      //     window_height = engine->event.window.data2;
-      //     glViewport(0, 0, window_width, window_height);
-      //     _Engine_UpdateProjectionMatrix();
-      //     globalScale = window_width / 800.0;
-      //     // Mat4_print("proj", m.projection);
-      //     // printf("w: %d, h: %d\n", window_width, window_height);
-      //     // Mat4_print("VP", m.vp);
-      //   }
-      // } break;
+      case SDL_WINDOWEVENT: {
+        if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
+          window_width = event.window.data1;
+          window_height = event.window.data2;
+          glViewport(0, 0, window_width, window_height);
+          _Engine_UpdateProjectionMatrix();
+          globalScale = window_width / 800.0;
+        }
+      } break;
 
     case SDL_QUIT: {
       engine->isRunning = 0;
