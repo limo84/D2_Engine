@@ -5,7 +5,7 @@
 #include "d2_priv.h"
 #include "d2_structs.h"
 #include "glad.h"
-#include "shaders.hh"
+#include "shaders.txt"
 
 #include <math.h>
 #include <stdbool.h>
@@ -15,24 +15,36 @@
 
 #define PI 3.14159265
 
+#define LOG(fmt, ...) logger_log(fmt, ...)
+
 int window_width;
 int window_height;
 
-unsigned int VBO, VAO, EBO;
+typedef struct {
+  unsigned int model;
+  unsigned int vp;
+  unsigned int animationFrame;
+  unsigned int animationFrameMax;
+  unsigned int scale; // unused ??
+  unsigned int recOnly;
+  unsigned int color;
+  unsigned int texture;
+  unsigned int texOffset;
+} Locations;
+
+typedef struct {
+  Locations locations;
+  unsigned int VBO; // ...
+  unsigned int VAO; // ...
+  unsigned int EBO; // ...
+  unsigned int shader;
+} OpenGl;
+
+OpenGl ogl;
+
 unsigned int polyVAO, polyVBO;
-unsigned int shader;
 
 Matrices m;
-
-unsigned int modelLoc;
-unsigned int vpLoc;
-unsigned int animationFrameLoc;
-unsigned int animationFrameMaxLoc;
-unsigned int scaleLoc;
-unsigned int recOnlyLoc;
-unsigned int colorLoc;
-unsigned int texOffsetLoc;
-int flipTextureLoc;
 
 bool keys[512];
 bool oldKeys[512];
@@ -41,9 +53,6 @@ Mouse oldMouse;
 
 float cameraPosX = 0;
 char *path;
-// Timer *fpsTimer;
-
-// Engine *engine;
 
 bool e_released = true;
 
@@ -67,10 +76,10 @@ void Engine_OpenWindow(u32 width, u32 height, bool fullscreen) {
   _Engine_CreatePolyVAO();
 
   // shader = Shader_New("shaders/vertex.shader", "shaders/fragment.shader");
-  shader = Shader_New("shaders\\vertex.shader", "shaders\\fragment.shader");
+  ogl.shader = Shader_New("shaders\\vertex.shader", "shaders\\fragment.shader");
   glEnable(GL_BLEND);
   glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-  glUseProgram(shader);
+  glUseProgram(ogl.shader);
 
   srand(1);
 
@@ -85,10 +94,6 @@ void Engine_RunMainloop(void (*mainloopFunction)(void)) {
   while (Engine_GetIsRunning()) {
     _Backend_HandleEvents();
     _Backend_CalculateDelta();
-    // if (Timer_getTime(fpsTimer) < 16) {
-    //   continue;
-    // }
-    // Timer_reset(fpsTimer);
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -115,9 +120,8 @@ void Sprite_DrawAt(Sprite *self, Vec2 position, float rotation) {
   Mat4_multiply(m.rotate, m.scale, m.model);
   Mat4_multiply(m.translate, m.model, m.model);
 
-  glUniform1i(recOnlyLoc, 0);
-  // glUniform1i(animationFrameMaxLoc, self->animation.frames);
-  // glUniform1i(animationFrameLoc, self->animationFrame);
+  glUniform1i(ogl.locations.recOnly, 0);
+
   float offsetX = 0;
   float offsetY = 0;
   float scaleX = 1;
@@ -131,13 +135,13 @@ void Sprite_DrawAt(Sprite *self, Vec2 position, float rotation) {
     scaleY = self->currentAnimation->dimensions.y / self->texture->height;
   }
 
-  glUniform4f(texOffsetLoc, offsetX, offsetY, scaleX, scaleY);
+  glUniform4f(ogl.locations.texOffset, offsetX, offsetY, scaleX, scaleY);
   float alpha = self->alpha;
-  glUniform4f(colorLoc, alpha, alpha, alpha, alpha);
+  glUniform4f(ogl.locations.color, alpha, alpha, alpha, alpha);
 
   glBindTexture(GL_TEXTURE_2D, self->texture->id);
-  glUniformMatrix4fv(modelLoc, 1, GL_TRUE, m.model);
-  glBindVertexArray(VAO);
+  glUniformMatrix4fv(ogl.locations.model, 1, GL_TRUE, m.model);
+  glBindVertexArray(ogl.VAO);
   glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
@@ -155,14 +159,14 @@ void Texture_DrawAt(Texture *self, Vec2 position) {
   Mat4_multiply(m.rotate, m.scale, m.model);
   Mat4_multiply(m.translate, m.model, m.model);
 
-  glUniform1i(recOnlyLoc, 0);
-  glUniform1i(animationFrameMaxLoc, 1);
-  glUniform1i(animationFrameLoc, 1);
-  glUniform4f(colorLoc, 1, 1, 1, 1);
+  glUniform1i(ogl.locations.recOnly, 0);
+  glUniform1i(ogl.locations.animationFrameMax, 1);
+  glUniform1i(ogl.locations.animationFrame, 1);
+  glUniform4f(ogl.locations.color, 1, 1, 1, 1);
 
   glBindTexture(GL_TEXTURE_2D, self->id);
-  glUniformMatrix4fv(modelLoc, 1, GL_TRUE, m.model);
-  glBindVertexArray(VAO);
+  glUniformMatrix4fv(ogl.locations.model, 1, GL_TRUE, m.model);
+  glBindVertexArray(ogl.VAO);
   glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
@@ -179,32 +183,25 @@ PixelFont *PixelFont_New(Texture *texture, u8 frameWidth, u8 frameHeight) {
 void _DrawCharacter(PixelFont *font, char c, Color color, int x, int y, u8 scale) {
   float sizeX = font->frameWidth / 100.0f * scale * globalScale; // WARUM DURCH 100 ???
   float sizeY = font->frameHeight / 100.0f * scale * globalScale;
-
   int index = c - 32;
-
   Mat4_set_rotation(m.rotate, 0);
   Mat4_set_translation(m.translate, x, y, 0);
   // Mat4_set_scalation(m.scale, 0, 0, 1); // TODO
   Mat4_set_scalation(m.scale, sizeX, sizeY, 1); // TODO
-
   Mat4_multiply(m.rotate, m.scale, m.model);
   Mat4_multiply(m.translate, m.model, m.model);
-
-  glUniform1i(recOnlyLoc, 0);
-  // glUniform1i(animationFrameMaxLoc, font->size);
-  // glUniform1i(animationFrameLoc, index);
-  glUniform4f(colorLoc, color.r, color.g, color.b, color.a);
-
+  glUniform1i(ogl.locations.recOnly, 0);
+  // glUniform1i(ogl.locations.animationFrameMax, font->size);
+  // glUniform1i(ogl.locations.animationFrame, index);
+  glUniform4f(ogl.locations.color, color.r, color.g, color.b, color.a);
   float offsetX = index * (float)font->frameWidth / font->texture->width;
   float offsetY = 0;
   float scaleX = (float)font->frameWidth / font->texture->width;
   float scaleY = (float)font->frameHeight / font->texture->height;
-
-  // printf("scales %f, %f\n", scaleX, scaleY);
-  glUniform4f(texOffsetLoc, offsetX, offsetY, scaleX, scaleY);
+  glUniform4f(ogl.locations.texOffset, offsetX, offsetY, scaleX, scaleY);
   glBindTexture(GL_TEXTURE_2D, font->texture->id);
-  glUniformMatrix4fv(modelLoc, 1, GL_TRUE, m.model);
-  glBindVertexArray(VAO);
+  glUniformMatrix4fv(ogl.locations.model, 1, GL_TRUE, m.model);
+  glBindVertexArray(ogl.VAO);
   glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
@@ -226,10 +223,10 @@ void _Engine_CreatePolyVAO() {
   };
 
   unsigned int indices[] = {
-      0, 1, 2, // first triangle
-      0, 2, 3, //
-      0, 3, 4, // second triangle
-      0, 4, 5  // second triangle
+      0, 1, 2,
+      0, 2, 3,
+      0, 3, 4,
+      0, 4, 5
   };
 
   GLuint ebo;
@@ -269,12 +266,12 @@ Color _ColorHexToRGBA(const char *colorHex) {
 void Engine_DrawLine(const char *colorHex, Vec2 a, Vec2 b) {
   float vertices[] = {a.x, a.y, 0, b.x, b.y, 0};
 
-  glUniform1i(recOnlyLoc, 1);
-  glUniform1i(animationFrameMaxLoc, 1);
-  glUniform1i(animationFrameLoc, 1);
+  glUniform1i(ogl.locations.recOnly, 1);
+  glUniform1i(ogl.locations.animationFrameMax, 1);
+  glUniform1i(ogl.locations.animationFrame, 1);
 
   float *unit = Mat4_CreateIdentity();
-  glUniformMatrix4fv(modelLoc, 1, GL_TRUE, unit);
+  glUniformMatrix4fv(ogl.locations.model, 1, GL_TRUE, unit);
 
   glBindVertexArray(polyVAO);
 
@@ -282,7 +279,7 @@ void Engine_DrawLine(const char *colorHex, Vec2 a, Vec2 b) {
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW);
   
   Color color = _ColorHexToRGBA(colorHex);
-  glUniform4f(colorLoc, color.r, color.g, color.b, color.a);
+  glUniform4f(ogl.locations.color, color.r, color.g, color.b, color.a);
   glDrawElements(GL_LINES, 3, GL_UNSIGNED_INT, 0);
 }
 
@@ -299,18 +296,18 @@ void Engine_DrawRectangle(const char *colorHex, Rect rect) {
   Mat4_multiply(m.rotate, m.scale, m.model);
   Mat4_multiply(m.translate, m.model, m.model);
 
-  glUniform1i(recOnlyLoc, 1);
-  glUniform1i(animationFrameMaxLoc, 1);
-  glUniform1i(animationFrameLoc, 1);
+  glUniform1i(ogl.locations.recOnly, 1);
+  glUniform1i(ogl.locations.animationFrameMax, 1);
+  glUniform1i(ogl.locations.animationFrame, 1);
   
   Color color = _ColorHexToRGBA(colorHex);
-  glUniform4f(colorLoc, color.r, color.g, color.b, color.a);
+  glUniform4f(ogl.locations.color, color.r, color.g, color.b, color.a);
 
   // glUniform1i(flipTextureLoc, self->flipTextureX);
 
   //glBindTexture(GL_TEXTURE_2D, self->id);
-  glUniformMatrix4fv(modelLoc, 1, GL_TRUE, m.model);
-  glBindVertexArray(VAO);
+  glUniformMatrix4fv(ogl.locations.model, 1, GL_TRUE, m.model);
+  glBindVertexArray(ogl.VAO);
   glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
@@ -344,13 +341,13 @@ void Engine_DrawPolygon(const char *colorHex, int amount, ...) {
 
   Color color = _ColorHexToRGBA(colorHex);
 
-  glUniform1i(recOnlyLoc, 1);
-  glUniform1i(animationFrameMaxLoc, 1);
-  glUniform1i(animationFrameLoc, 1);
-  glUniform4f(colorLoc, color.r, color.g, color.b, color.a);
+  glUniform1i(ogl.locations.recOnly, 1);
+  glUniform1i(ogl.locations.animationFrameMax, 1);
+  glUniform1i(ogl.locations.animationFrame, 1);
+  glUniform4f(ogl.locations.color, color.r, color.g, color.b, color.a);
 
   float *unit = Mat4_CreateIdentity();
-  glUniformMatrix4fv(modelLoc, 1, GL_TRUE, unit);
+  glUniformMatrix4fv(ogl.locations.model, 1, GL_TRUE, unit);
 
   glBindVertexArray(polyVAO);
 
@@ -396,7 +393,7 @@ void Engine_UpdateCamera(float x, float y) {
   Mat4_set_translation(m.view, -cameraPosX, 0.0, 0);
   Mat4_multiply(m.projection, m.view, m.vp);
   // Mat4_print("m.projection", m.projection);
-  glUniformMatrix4fv(vpLoc, 1, GL_TRUE, m.vp);
+  glUniformMatrix4fv(ogl.locations.vp, 1, GL_TRUE, m.vp);
 }
 
 u32 Engine_GetWindowWidth() { return window_width; }
@@ -454,26 +451,18 @@ bool Mouse_IsInsideRect(Rect rect) {
 
 void _Engine_InitMatrices() {
 
-  m.projection = Mat4_CreateIdentity();
-  m.view = Mat4_CreateIdentity();
+  m.projection = Mat4_CreateIdentity(); // converts clipping space to screen coords
+  m.view = Mat4_CreateIdentity(); // "moves camera" or rather all objects (to l if cam moves r)
   m.vp = Mat4_CreateIdentity();
   m.scale = Mat4_CreateIdentity();
   m.translate = Mat4_CreateIdentity();
   m.rotate = Mat4_CreateIdentity();
   m.model = Mat4_CreateIdentity();
 
-  //   float *projection; // converts clipping space to screen coords
-  // float *view; // "moves camera" or rather all objects (to l if cam moves r)
-  // float *vp;
-  // float *model;
-  // float *scale;
-  // float *translate;
-  // float *rotate;
-
   Mat4_set_translation(m.view, 0, 0, 0);
   Mat4_multiply(m.projection, m.view, m.vp);
   // Mat4_print("m.projection", m.projection);
-  glUniformMatrix4fv(vpLoc, 1, GL_TRUE, m.vp);
+  glUniformMatrix4fv(ogl.locations.vp, 1, GL_TRUE, m.vp);
 
   // TODO also when window gets resized
   m.projection[0] = 2.0f / window_width;
@@ -500,37 +489,37 @@ void _Engine_UpdateProjectionMatrix() {
   Mat4_print("VP", m.vp);
   Mat4_multiply(m.projection, m.view, m.vp);
   Mat4_print("VP", m.vp);
-  glUniformMatrix4fv(vpLoc, 1, GL_TRUE, m.vp);
+  glUniformMatrix4fv(ogl.locations.vp, 1, GL_TRUE, m.vp);
 }
 
 void _Engine_InitUniformLocs() {
-  modelLoc = glGetUniformLocation(shader, "model");
-  vpLoc = glGetUniformLocation(shader, "vp");
-  colorLoc = glGetUniformLocation(shader, "shaderColor");
-  unsigned int textureLoc = glGetUniformLocation(shader, "ourTexture");
-  animationFrameLoc = glGetUniformLocation(shader, "animationFrame");
-  animationFrameMaxLoc = glGetUniformLocation(shader, "animationFrameMax");
-  flipTextureLoc = glGetUniformLocation(shader, "flipTexture");
-  recOnlyLoc = glGetUniformLocation(shader, "recOnly");
-  texOffsetLoc = glGetUniformLocation(shader, "textureOffset");
+  ogl.locations.model = glGetUniformLocation(ogl.shader, "model");
+  ogl.locations.vp = glGetUniformLocation(ogl.shader, "vp");
+  ogl.locations.color = glGetUniformLocation(ogl.shader, "shaderColor");
+  ogl.locations.texture = glGetUniformLocation(ogl.shader, "ourTexture");
+  ogl.locations.animationFrame = glGetUniformLocation(ogl.shader, "animationFrame");
+  ogl.locations.animationFrameMax = glGetUniformLocation(ogl.shader, "animationFrameMax");
+  // flipTextureLoc = glGetUniformLocation(ogl.shader, "flipTexture");
+  ogl.locations.recOnly = glGetUniformLocation(ogl.shader, "recOnly");
+  ogl.locations.texOffset = glGetUniformLocation(ogl.shader, "textureOffset");
 
-  // glUniform4f(colorLoc, 1.0f, 0.0f, 0.0f, 1.0f);
-  glUniformMatrix4fv(vpLoc, 1, GL_TRUE, m.projection);
-  glUniform1i(textureLoc, 0);
-  glUniform1i(animationFrameLoc, 0);
-  glUniform1i(flipTextureLoc, 0);
-  glUniform1i(recOnlyLoc, 0);
+  // glUniform4f(ogl.locations.color, 1.0f, 0.0f, 0.0f, 1.0f);
+  glUniformMatrix4fv(ogl.locations.vp, 1, GL_TRUE, m.projection);
+  glUniform1i(ogl.locations.texture, 0);
+  glUniform1i(ogl.locations.animationFrame, 0);
+  // glUniform1i(flipTextureLoc, 0);
+  glUniform1i(ogl.locations.recOnly, 0);
 }
 
 void print_transform_locs() {
-  printf("shader id: %d\n", shader);
-  printf("transform loc: %d\n", modelLoc);
-  printf("vp loc: %d\n", vpLoc);
-  printf("color loc: %d\n", colorLoc);
-  // printf("texture loc: %d\n", textureLoc);
-  printf("animationFrame loc: %d\n", animationFrameLoc);
-  printf("animationFrameMax loc: %d\n", animationFrameMaxLoc);
-  printf("flipTexture loc: %d\n", flipTextureLoc);
+  printf("shader id: %d\n", ogl.shader);
+  printf("transform loc: %d\n", ogl.locations.model);
+  printf("vp loc: %d\n", ogl.locations.vp);
+  printf("color loc: %d\n", ogl.locations.color);
+  // printf("texture loc: %d\n", ogl.locations.texture);
+  printf("animationFrame loc: %d\n", ogl.locations.animationFrame);
+  printf("animationFrameMax loc: %d\n", ogl.locations.animationFrameMax);
+  // printf("flipTexture loc: %d\n", flipTextureLoc);
 }
 
 Texture *Texture_LoadFromFile(char const *filename) {
@@ -632,10 +621,10 @@ void Button_Draw(Button *self) {
   Mat4_multiply(m.rotate, m.scale, m.model);
   Mat4_multiply(m.translate, m.model, m.model);
 
-  glUniform1i(recOnlyLoc, 0);
-  // glUniform1i(animationFrameMaxLoc, 1);
-  // glUniform1i(animationFrameLoc, 1);
-  glUniform4f(colorLoc, 1, 1, 1, 1);
+  glUniform1i(ogl.locations.recOnly, 0);
+  // glUniform1i(ogl.locations.animationFrameMax, 1);
+  // glUniform1i(ogl.locations.animationFrame, 1);
+  glUniform4f(ogl.locations.color, 1, 1, 1, 1);
   // glUniform1i(flipTextureLoc, self->flipTextureX);
 
   // float offsetX = (float)self->src.w / self->texture->width;
@@ -644,10 +633,10 @@ void Button_Draw(Button *self) {
   float scaleX = (float)self->src.w / self->texture->width;
   float scaleY = (float)self->src.h / self->texture->height;
 
-  glUniform4f(texOffsetLoc, offsetX, offsetY, scaleX, scaleY);
+  glUniform4f(ogl.locations.texOffset, offsetX, offsetY, scaleX, scaleY);
   glBindTexture(GL_TEXTURE_2D, self->texture->id);
-  glUniformMatrix4fv(modelLoc, 1, GL_TRUE, m.model);
-  glBindVertexArray(VAO);
+  glUniformMatrix4fv(ogl.locations.model, 1, GL_TRUE, m.model);
+  glBindVertexArray(ogl.VAO);
   glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
@@ -659,14 +648,14 @@ void Sprite_DrawHitbox(Sprite *self) {
 
   Mat4_multiply(m.translate, m.scale, m.model);
 
-  glUniform1i(recOnlyLoc, 1);
-  // glUniform1i(animationFrameMaxLoc, self->animationFrameMax);
-  // glUniform1i(animationFrameLoc, self->animationFrame);
+  glUniform1i(ogl.locations.recOnly, 1);
+  // glUniform1i(ogl.locations.animationFrameMax, self->animationFrameMax);
+  // glUniform1i(ogl.locations.animationFrame, self->animationFrame);
   // glUniform1i(flipTextureLoc, self->flipTexture);
 
   // glBindTexture(GL_TEXTURE_2D, self->texture);
-  glUniformMatrix4fv(modelLoc, 1, GL_TRUE, m.model);
-  glBindVertexArray(VAO);
+  glUniformMatrix4fv(ogl.locations.model, 1, GL_TRUE, m.model);
+  glBindVertexArray(ogl.VAO);
   glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
@@ -689,8 +678,8 @@ void Sprite_DrawHitbox(Sprite *self) {
 // void texture_render(u8 texture, float pos_x, float pos_y, float scale_x,
 //                     float scale_y) {
 
-//   glUniform1i(recOnlyLoc, 0);
-//   glUniform1i(animationFrameMaxLoc, 1);
+//   glUniform1i(ogl.locations.recOnly, 0);
+//   glUniform1i(ogl.locations.animationFrameMax, 1);
 //   glUniform1i(flipTextureLoc, 0);
 //   glBindTexture(GL_TEXTURE_2D, texture);
 
@@ -700,8 +689,8 @@ void Sprite_DrawHitbox(Sprite *self) {
 //   Mat4_set_scalation(m.scale, scale_x, scale_y, 1);
 //   m.model = Mat4_multiply(m.scale, m.model);
 
-//   glUniformMatrix4fv(modelLoc, 1, GL_TRUE, m.model);
-//   glBindVertexArray(VAO);
+//   glUniformMatrix4fv(ogl.locations.model, 1, GL_TRUE, m.model);
+//   glBindVertexArray(ogl.VAO);
 //   glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 // }
 
@@ -813,18 +802,18 @@ void _Engine_CreateQuadVAO() {
       0, 2, 3  // second triangle
   };
 
-  glGenVertexArrays(1, &VAO); // generates 1 buffer for the VAO
-  glGenBuffers(1, &VBO);      // generates 1 buffer for the VBO
-  glGenBuffers(1, &EBO);      // generates 1 buffer for the EBO
+  glGenVertexArrays(1, &ogl.VAO); // generates 1 buffer for the VAO
+  glGenBuffers(1, &ogl.VBO);      // generates 1 buffer for the VBO
+  glGenBuffers(1, &ogl.EBO);      // generates 1 buffer for the EBO
 
-  glBindVertexArray(VAO); // Binds the VAO to save all operation that are made
+  glBindVertexArray(ogl.VAO); // Binds the VAO to save all operation that are made
                           // on the VBO (and EBO ?)
 
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
+  glBindBuffer(GL_ARRAY_BUFFER, ogl.VBO);
   // glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW);
 
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ogl.EBO);
   // glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices,
   // GL_STATIC_DRAW);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_DYNAMIC_DRAW);

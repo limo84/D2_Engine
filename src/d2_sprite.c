@@ -7,26 +7,20 @@
 Sprite *Sprite_New(Texture *texture, u32 x, u32 y) {
   Sprite *self = (Sprite *)calloc(1, sizeof(Sprite));
   self->texture = texture;
-
   self->animationFrame = 0;
-  //   self->animationFrameMax = 1;
   self->flipTextureX = false;
   self->flipTextureY = false;
-
   self->position.x = x;
   self->position.y = y;
   self->rotation = 0;
   self->alpha = 1;
-
   self->width = texture->width;
   self->height = texture->height;
   self->animationTimer = Timer_New(0);
   self->currentAnimation = NULL;
   self->nextAnimation = NULL;
-
   self->animationsAmount = 0;
   self->animations = NULL;
-  // self->animations[0] = (Animation){{0, 0}, {texture->width, texture->height}, 1};
   return self;
 }
 
@@ -78,7 +72,6 @@ void Sprite_SetAnimation(Sprite *self, char name[ANIMATION_NAME_LENGTH], bool lo
   if (self->currentAnimation != NULL && strcmp(self->currentAnimation->name, name) == 0) {
     return;
   }
-  printf("asd\n");
   self->animationFrame = 0;
   self->currentAnimation = Sprite_GetAnimation(self, name);
   self->nextAnimation = NULL;
@@ -95,36 +88,22 @@ void Sprite_PlayAnimationOnce(Sprite *self, char name[ANIMATION_NAME_LENGTH], ch
 }
 
 void Sprite_Update(Sprite *self) {
-
-
   if (self->currentAnimation == NULL) {
     return;
   }
-
   Timer_Update(self->animationTimer);
-
-  // printf("huhuu %lu\n", self->animationTimer->currentTime);
-
-  // printf("%lu\n", Timer_getTime(self->animationTimer));
   if (self->animationTimer->elapsed) {
-
     bool animationHasEnded = self->currentAnimation->frames == self->animationFrame + 1;
-
     if (animationHasEnded && !self->loopAnimation) {
       return;
     }
-
     self->animationFrame++;
-
     if (animationHasEnded && self->nextAnimation != NULL) {
       self->currentAnimation = self->nextAnimation;
       self->animationFrame = 0;
       self->nextAnimation = NULL;
     }
-
     self->animationFrame %= self->currentAnimation->frames;
-    // printf("anim: %d\n", self->animationFrame);
-
     Timer_Reset(self->animationTimer, self->currentAnimation->duration);
   }
 }
