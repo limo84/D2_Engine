@@ -29,5 +29,4 @@ void _Engine_CreatePolyVAO();
 void _Backend_SwapBuffers();
 void _Backend_CalculateDelta();
 void _Backend_InitTime();
-
 void _Backend_HandleEvents();
