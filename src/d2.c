@@ -63,7 +63,7 @@ unsigned int _defaultShader();
 void Engine_Init() {}
 
 void Engine_OpenWindow(u32 width, u32 height, bool fullscreen) {
-  path = SDL_GetBasePath();
+  _Backend_GetPath(path);
   window_width = width;   // TODO remove
   window_height = height; // TODO remove
   logger_set_filename("d2log.log");
@@ -101,7 +101,6 @@ void Sprite_DrawAt(Sprite *self, Vec2 position, float rotation) {
   float sizeX = (self->flipTextureX ? -1 : 1) * self->width / 100.0f * globalScale;
   float sizeY = (self->flipTextureY ? 1 : -1) * self->height / 100.0f * globalScale;
   Mat4_set_rotation(m.rotate, Engine_DegreeToRadians(rotation));
-  // +50 hier ist eher sprite.width * sprite.scale / 2
   Mat4_set_translation(m.translate, position.x + self->width * globalScale / 2.0f,
       position.y + self->height * globalScale / 2.0f, 0);
   Mat4_set_scalation(m.scale, sizeX, -sizeY, 1); // TODO
@@ -155,16 +154,17 @@ void Texture_DrawAt(Texture *self, Vec2 position) {
 
 void Texture_Free(Texture *self) { free(self); }
 
-PixelFont *PixelFont_New(Texture *texture, u8 frameWidth, u8 frameHeight) {
+PixelFont *PixelFont_New(Texture *texture, u8 frameWidth, u8 frameHeight, u8 spacing) {
   PixelFont *self = malloc(sizeof(PixelFont));
   self->texture = texture;
   self->frameWidth = frameWidth;
   self->frameHeight = frameHeight;
+  self->spacing = spacing;
   return self;
 }
 
-void _DrawCharacter(PixelFont *font, char c, Color color, int x, int y, u8 scale) {
-  float sizeX = font->frameWidth / 100.0f * scale * globalScale; // WARUM DURCH 100 ???
+void _DrawCharacter(PixelFont *font, char c, Color color, int x, int y, float scale) {
+  float sizeX = font->frameWidth / 100.0f * scale * globalScale; // WARUM DURCH 100 ??? WEIL VERTICES WIDTH = 100
   float sizeY = font->frameHeight / 100.0f * scale * globalScale;
   int index = c - 32;
   Mat4_set_rotation(m.rotate, 0);
@@ -188,9 +188,9 @@ void _DrawCharacter(PixelFont *font, char c, Color color, int x, int y, u8 scale
   glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
-void Engine_DrawText(PixelFont *font, Color color, char *Text, int x, int y, u8 scale) {
+void Engine_DrawText(PixelFont *font, Color color, char *Text, int x, int y, float scale) {
   for (int i = 0; Text[i]; i++) {
-    _DrawCharacter(font, Text[i], color, x + scale * i * font->frameWidth, y, scale);
+    _DrawCharacter(font, Text[i], color, x + scale * i * (font->frameWidth + font->spacing), y, scale);
   }
 }
 

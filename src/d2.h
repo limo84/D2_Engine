@@ -7,6 +7,7 @@
 #include "glad.h"
 
 #include "d2_structs.h"
+// #include "d2_keys.h"
 #include "stb_image.h"
 #include "stb_truetype.h"
 #include "lsh_logger.h"
@@ -20,7 +21,7 @@ void Engine_RunMainloop(void (*mainloopFunction)(void));
 void Engine_DrawPolygon(const char *colorHex, int amount, ...);
 void Engine_DrawRectangle(const char *colorHex, Rect rect);
 void Engine_DrawLine(const char *colorHex, Vec2 a, Vec2 b);
-void Engine_DrawText(PixelFont *font, Color color, char *Text, int x, int y, u8 scale);
+void Engine_DrawText(PixelFont *font, Color color, char *Text, int x, int y, float scale);
 void Engine_ResizeWindow(int w, int h);
 void Engine_SetWindowFullscreen();
 float Engine_DegreeToRadians(float degree);
@@ -38,7 +39,7 @@ u16 Engine_GetDelta();
 bool Engine_GetIsRunning();
 void Engine_SetIsRunning(bool setRunning);
 
-PixelFont *PixelFont_New(Texture *texture, u8 frameWidth, u8 frameHeight);
+PixelFont *PixelFont_New(Texture *texture, u8 frameWidth, u8 frameHeight, u8 spacing);
 
 Texture *Texture_LoadFromFile(char const *filename);
 void Texture_Free(Texture *texture);

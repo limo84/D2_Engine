@@ -116,6 +116,7 @@ typedef struct {
   Texture *texture;
   u8 frameWidth;
   u8 frameHeight;
+  u8 spacing;
   // Rect src;
   // Rect dest;
   // u8 size;

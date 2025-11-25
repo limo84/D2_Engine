@@ -19,6 +19,7 @@ typedef struct {
 // GLFWwindow *_Engine_CreateGlfwWindow(u32 width, u32 height, bool fullscreen);
 // SDL_Window *_Engine_CreateSdlWindow(u32 width, u32 height, bool fullscreen);
 
+void _Backend_GetPath(char *path);
 void _Backend_CreateWindow(u32 width, u32 height, bool fullscreen);
 
 void _Engine_InitMatrices();

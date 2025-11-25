@@ -1,5 +1,7 @@
 {
     "files.associations": {
-        "string.h": "c"
+        "*.hh": "ignore",
+        "string.h": "c",
+        "d2_structs.h": "c"
     },
 }

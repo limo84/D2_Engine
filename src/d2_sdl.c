@@ -41,6 +41,10 @@ extern int window_width;
 extern int window_height;
 extern float globalScale;
 
+void _Backend_GetPath(char *path) {
+  path = SDL_GetBasePath();
+}
+
 void _Backend_CreateWindow(u32 width, u32 height, bool fullscreen) {
 
   engine = malloc(sizeof(Engine));
@@ -73,7 +77,7 @@ void _Backend_CreateWindow(u32 width, u32 height, bool fullscreen) {
   }
 
   SDL_Window *window = NULL;
-  Uint32 flags = SDL_WINDOW_OPENGL | (fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
+  Uint32 flags = SDL_WINDOW_OPENGL | (fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : SDL_WINDOW_RESIZABLE);
   //window = SDL_CreateWindow("D2_Engine", displayBounds[useDisplay].x, displayBounds[useDisplay].y,
   //    width, height, flags);
   window = SDL_CreateWindow("D2_Engine", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, flags);
