@@ -104,7 +104,7 @@ struct _button {
 };
 
 typedef struct {
-  float r, g, b, a;
+  u8 r, g, b, a;
 } Color;
 
 typedef struct {

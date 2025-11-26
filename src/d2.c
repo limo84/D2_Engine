@@ -169,8 +169,7 @@ void _DrawCharacter(PixelFont *font, char c, Color color, int x, int y, float sc
   int index = c - 32;
   Mat4_set_rotation(m.rotate, 0);
   Mat4_set_translation(m.translate, x, y, 0);
-  // Mat4_set_scalation(m.scale, 0, 0, 1); // TODO
-  Mat4_set_scalation(m.scale, sizeX, sizeY, 1); // TODO
+  Mat4_set_scalation(m.scale, sizeX, sizeY, 1);
   Mat4_multiply(m.rotate, m.scale, m.model);
   Mat4_multiply(m.translate, m.model, m.model);
   glUniform1i(ogl.locations.recOnly, 0);
@@ -190,7 +189,7 @@ void _DrawCharacter(PixelFont *font, char c, Color color, int x, int y, float sc
 
 void Engine_DrawText(PixelFont *font, Color color, char *Text, int x, int y, float scale) {
   for (int i = 0; Text[i]; i++) {
-    _DrawCharacter(font, Text[i], color, x + scale * i * (font->frameWidth + font->spacing), y, scale);
+    _DrawCharacter(font, Text[i], color, x + globalScale * scale * i * (font->frameWidth + font->spacing), y, scale);
   }
 }
 
@@ -204,44 +203,38 @@ void _Engine_CreatePolyVAO() {
       100, 0, 0,  //
       200, 200, 0 //
   };
-
   unsigned int indices[] = {
       0, 1, 2,
       0, 2, 3,
       0, 3, 4,
       0, 4, 5
   };
-
   GLuint ebo;
-
   glGenVertexArrays(1, &polyVAO);
   glGenBuffers(1, &polyVBO); // Generate 1 buffer
   glGenBuffers(1, &ebo);
-
   glBindVertexArray(polyVAO);
   glBindBuffer(GL_ARRAY_BUFFER, polyVBO);
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_DYNAMIC_DRAW);
-
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
   glEnableVertexAttribArray(0);
-
-  glBindBuffer(GL_ARRAY_BUFFER, 0); // unbinds the VBO, not required ??
+  glBindBuffer(GL_ARRAY_BUFFER, 0); // unbinds the VBO, not required ?
   glBindVertexArray(0);             // unbinds the VAO
 }
 
 Color _ColorHexToRGBA(const char *colorHex) {
   u8 len = strlen(colorHex);
   if (len != 6 && len != 8) {
-    printf("wrong color string\n");
-    return (Color){0, 0, 0, 1};
+    logger_log("wrong color string\n");
+    return (Color){0, 0, 0, 255};
   }
-  float values[4] = {1};
+  u8 values[4] = {0};
   char buf[3];
   for (int i = 0; i < len / 2; i++) {
     strncpy(buf, colorHex + 2 * i, 2);
-    values[i] = ((u8) strtoul(buf, NULL, 16)) / 255.0f;
+    values[i] = ((u8) strtoul(buf, NULL, 16));
   }
   return (Color) {values[0], values[1],values[2], values[3]};
 }
@@ -250,8 +243,8 @@ void Engine_DrawLine(const char *colorHex, Vec2 a, Vec2 b) {
   float vertices[] = {a.x, a.y, 0, b.x, b.y, 0};
 
   glUniform1i(ogl.locations.recOnly, 1);
-  glUniform1i(ogl.locations.animationFrameMax, 1);
-  glUniform1i(ogl.locations.animationFrame, 1);
+  // glUniform1i(ogl.locations.animationFrameMax, 1);
+  // glUniform1i(ogl.locations.animationFrame, 1);
 
   float *unit = Mat4_CreateIdentity();
   glUniformMatrix4fv(ogl.locations.model, 1, GL_TRUE, unit);
@@ -269,36 +262,22 @@ void Engine_DrawLine(const char *colorHex, Vec2 a, Vec2 b) {
 void Engine_DrawRectangle(const char *colorHex, Rect rect) {
   float sizeX = rect.w / 100.0f * globalScale;
   float sizeY = rect.h / 100.0f * globalScale;
-
   Mat4_set_rotation(m.rotate, 0);
-  // +50 hier ist eher sprite.width * sprite.scale / 2
   Mat4_set_translation(m.translate, rect.x + rect.w * globalScale / 2.0f,
       rect.y + rect.h * globalScale / 2.0f, 0);
-  Mat4_set_scalation(m.scale, sizeX, -sizeY, 1); // TODO
-
+  Mat4_set_scalation(m.scale, sizeX, -sizeY, 1);
   Mat4_multiply(m.rotate, m.scale, m.model);
   Mat4_multiply(m.translate, m.model, m.model);
-
   glUniform1i(ogl.locations.recOnly, 1);
-  glUniform1i(ogl.locations.animationFrameMax, 1);
-  glUniform1i(ogl.locations.animationFrame, 1);
-  
   Color color = _ColorHexToRGBA(colorHex);
-  glUniform4f(ogl.locations.color, color.r, color.g, color.b, color.a);
-
-  // glUniform1i(flipTextureLoc, self->flipTextureX);
-
-  //glBindTexture(GL_TEXTURE_2D, self->id);
+  glUniform4f(ogl.locations.color, color.r / 255.0, color.g / 255.0,
+    color.b / 255.0, color.a / 255.0);
   glUniformMatrix4fv(ogl.locations.model, 1, GL_TRUE, m.model);
   glBindVertexArray(ogl.VAO);
   glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
 void Engine_DrawPolygon(const char *colorHex, int amount, ...) {
-
-  // if (amount < 3) {
-  //   //
-  // }
 
   float vertices[] = {
       80, 100, 0,  //
@@ -311,29 +290,20 @@ void Engine_DrawPolygon(const char *colorHex, int amount, ...) {
 
   va_list valist;
   va_start(valist, amount);
-
-  /* access all the arguments assigned to valist */
   for (int i = 0; i < amount; i++) {
     Vec2 vec = va_arg(valist, Vec2);
     vertices[i * 3] = vec.x;
     vertices[i * 3 + 1] = vec.y;
   }
-
-  /* clean memory reserved for valist */
   va_end(valist);
 
   Color color = _ColorHexToRGBA(colorHex);
-
+  glUniform4f(ogl.locations.color, color.r / 255.0, color.g / 255.0,
+    color.b / 255.0, color.a / 255.0);
   glUniform1i(ogl.locations.recOnly, 1);
-  glUniform1i(ogl.locations.animationFrameMax, 1);
-  glUniform1i(ogl.locations.animationFrame, 1);
-  glUniform4f(ogl.locations.color, color.r, color.g, color.b, color.a);
-
   float *unit = Mat4_CreateIdentity();
   glUniformMatrix4fv(ogl.locations.model, 1, GL_TRUE, unit);
-
   glBindVertexArray(polyVAO);
-
   glBindBuffer(GL_ARRAY_BUFFER, polyVBO);
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW);
 

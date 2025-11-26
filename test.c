@@ -10,10 +10,10 @@
 #include "src/d2.h"
 #include "src/d2_keys.h"
 
-#define RED (Color) { 1, 0, 0, 1 }
-#define BLACK (Color) { 0, 0, 0, 1 }
-#define YELLOW (Color) { 1, 1, 0, 1 }
-#define WHITE (Color) { 0.9, 0.9, 0.9, 1 }
+#define RED (Color) { 255, 0, 0, 255 }
+#define BLACK (Color) { 0, 0, 0, 255 }
+#define YELLOW (Color) { 255, 255, 0, 255 }
+#define WHITE (Color) { 240, 240, 240, 255 }
 
 typedef enum { MENU_RES_800x600, MENU_RES_1000x800, MENU_RES_1280x720, MENU_RES_FULLSCREEN, MENU_RES_NUM } MENU;
 Sprite *sprite = NULL;
@@ -31,13 +31,6 @@ void mainloop() {
   Engine_DrawPolygon("ab231fff", 3, (Vec2){100, 100}, (Vec2){500, 100}, (Vec2){500, 300});
   Sprite_Draw(sprite2);
   Sprite_Draw(sprite);
-  // Engine_DrawText(font, (Color){255, 255, 255, 255}, "ABCDEFGHIJKLMNOPQRSTUVWXYZ", 100, 100, 1);
-  // Engine_DrawText(font, (Color){255, 255, 255, 255}, "W", 100, 100, 0.2);
-  // Engine_DrawText(font, (Color){0, 0, 0, 255}, "W", 120, 100, 0.4);
-  // Engine_DrawText(font, (Color){255, 255, 255, 255}, "W", 150, 100, 1);
-  // Engine_DrawText(font, (Color){255, 255, 255, 255}, "W", 180, 100, 2);
-  // Engine_DrawText(font, (Color){255, 255, 255, 255}, "W", 220, 100, 3);
-  // Engine_DrawText(font, WHITE, "W", 250, 100, 4);
   drawMenu();
 }
 
@@ -84,7 +77,7 @@ void drawMenu() {
   Engine_DrawText(font, (menu == MENU_RES_800x600) ? RED : YELLOW, " 800 x 600", x, 400, 1);
   Engine_DrawText(font, (menu == MENU_RES_1000x800) ? RED : YELLOW, "1000 x 800", x, 350, 1);
   Engine_DrawText(font, (menu == MENU_RES_1280x720) ? RED : YELLOW, "1280 x 720", x, 300, 1);
-  Engine_DrawText(font, (menu == MENU_RES_FULLSCREEN) ? RED : WHITE, "Fullscreen", x, 250, 1);
+  Engine_DrawText(font, (menu == MENU_RES_FULLSCREEN) ? RED : WHITE, "WWWWWwwwullscreen", x, 250, 1);
 
   if (Engine_GetKeyPressedOnce(D2_KEY_DOWN)) {
     menu = (menu + 1) % MENU_RES_NUM;
