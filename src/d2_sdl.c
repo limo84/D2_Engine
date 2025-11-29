@@ -77,7 +77,8 @@ void _Backend_CreateWindow(u32 width, u32 height, bool fullscreen) {
   }
 
   SDL_Window *window = NULL;
-  Uint32 flags = SDL_WINDOW_OPENGL | (fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : SDL_WINDOW_RESIZABLE);
+  // Uint32 flags = SDL_WINDOW_OPENGL | (fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : SDL_WINDOW_RESIZABLE);
+  Uint32 flags = SDL_WINDOW_OPENGL | (fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
   //window = SDL_CreateWindow("D2_Engine", displayBounds[useDisplay].x, displayBounds[useDisplay].y,
   //    width, height, flags);
   window = SDL_CreateWindow("D2_Engine", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, flags);
@@ -196,19 +197,24 @@ void _Backend_CalculateDelta() {
   }
 }
 
-// void Engine_ResizeWindow(int w, int h) {
-//   SDL_Engine_SetWindowFullscreen(engine->window, 0);
-//   SDL_SetWindowSize(engine->window, w, h);
-//   window_width = w;
-//   window_height = h;
-//   glViewport(0, 0, window_width, window_height);
-//   _Engine_UpdateProjectionMatrix();
-//   globalScale = window_width / 1920.0;
-// }
+void Engine_ResizeWindow(int w, int h) {
+  SDL_SetWindowFullscreen(engine->window, 0);
+  SDL_SetWindowSize(engine->window, w, h);
+  window_width = w;
+  window_height = h;
+  glViewport(0, 0, window_width, window_height);
+  _Engine_UpdateProjectionMatrix();
+  globalScale = window_width / 1920.0;
+}
 
-// void Engine_SetWindowFullscreen() {
-//   SDL_Engine_SetWindowFullscreen(engine->window,
-//   SDL_WINDOW_FULLSCREEN_DESKTOP);
-// }
+void Engine_SetWindowFullscreen() {
+  window_width = 1920;
+  window_height = 1080;
+  SDL_SetWindowSize(engine->window, 1920, 1080); 
+  globalScale = window_width / 1920.0;
+  _Engine_UpdateProjectionMatrix();
+  glViewport(0, 0, window_width, window_height);
+  SDL_SetWindowFullscreen(engine->window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+}
 
 #endif

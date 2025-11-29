@@ -77,7 +77,7 @@ void drawMenu() {
   Engine_DrawText(font, (menu == MENU_RES_800x600) ? RED : YELLOW, " 800 x 600", x, 400, 1);
   Engine_DrawText(font, (menu == MENU_RES_1000x800) ? RED : YELLOW, "1000 x 800", x, 350, 1);
   Engine_DrawText(font, (menu == MENU_RES_1280x720) ? RED : YELLOW, "1280 x 720", x, 300, 1);
-  Engine_DrawText(font, (menu == MENU_RES_FULLSCREEN) ? RED : WHITE, "WWWWWwwwullscreen", x, 250, 1);
+  Engine_DrawText(font, (menu == MENU_RES_FULLSCREEN) ? RED : YELLOW, "Fullscreen", x, 250, 1);
 
   if (Engine_GetKeyPressedOnce(D2_KEY_DOWN)) {
     menu = (menu + 1) % MENU_RES_NUM;
@@ -90,19 +90,19 @@ void drawMenu() {
   if (Engine_GetKeyPressedOnce(D2_KEY_ENTER)) {
     switch (menu) {
     case MENU_RES_800x600: {
-      // Engine_ResizeWindow(800, 600);
+      Engine_ResizeWindow(800, 600);
       break;
     }
     case MENU_RES_1000x800: {
-      // Engine_ResizeWindow(1000, 800);
+      Engine_ResizeWindow(1000, 800);
       break;
     }
     case MENU_RES_1280x720: {
-      // Engine_ResizeWindow(1280, 720);
+      Engine_ResizeWindow(1280, 720);
       break;
     }
     case MENU_RES_FULLSCREEN: {
-      // Engine_SetWindowFullscreen();
+      Engine_SetWindowFullscreen();
       break;
     }
     default:
