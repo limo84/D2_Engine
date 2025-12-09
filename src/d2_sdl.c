@@ -3,6 +3,7 @@
 #include "d2.h"
 #include "d2_keys.h"
 #include "d2_priv.h"
+#include "glad.h"
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_events.h>
@@ -16,7 +17,6 @@
 
 struct Engine {
   SDL_Window *window;
-  // GLFWevent event;
   bool isRunning;
 };
 
