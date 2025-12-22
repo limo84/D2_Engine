@@ -9,13 +9,14 @@
 
 #include "src/d2.h"
 #include "src/d2_keys.h"
+#include <lsh/lsh_logger.h>
 
 #define RED (Color) { 255, 0, 0, 255 }
 #define BLACK (Color) { 0, 0, 0, 255 }
 #define YELLOW (Color) { 255, 255, 0, 255 }
 #define WHITE (Color) { 240, 240, 240, 255 }
 
-typedef enum { MENU_RES_800x600, MENU_RES_1000x800, MENU_RES_1280x720, MENU_RES_FULLSCREEN, MENU_RES_NUM } MENU;
+typedef enum { MENU_RES_800x600, MENU_RES_1000x800, MENU_RES_1280x720, MENU_RES_1920x1080, MENU_RES_FULLSCREEN, MENU_RES_NUM } MENU;
 Sprite *sprite = NULL;
 Sprite *sprite2 = NULL;
 PixelFont *font = NULL;
@@ -77,7 +78,8 @@ void drawMenu() {
   Engine_DrawText(font, (menu == MENU_RES_800x600) ? RED : YELLOW, " 800 x 600", x, 400, 1);
   Engine_DrawText(font, (menu == MENU_RES_1000x800) ? RED : YELLOW, "1000 x 800", x, 350, 1);
   Engine_DrawText(font, (menu == MENU_RES_1280x720) ? RED : YELLOW, "1280 x 720", x, 300, 1);
-  Engine_DrawText(font, (menu == MENU_RES_FULLSCREEN) ? RED : YELLOW, "Fullscreen", x, 250, 1);
+  Engine_DrawText(font, (menu == MENU_RES_1920x1080) ? RED : YELLOW, "1920 x 1080", x, 250, 1);
+  Engine_DrawText(font, (menu == MENU_RES_FULLSCREEN) ? RED : YELLOW, "Fullscreen", x, 200, 1);
 
   if (Engine_GetKeyPressedOnce(D2_KEY_DOWN)) {
     menu = (menu + 1) % MENU_RES_NUM;
@@ -99,6 +101,10 @@ void drawMenu() {
     }
     case MENU_RES_1280x720: {
       Engine_ResizeWindow(1280, 720);
+      break;
+    }
+    case MENU_RES_1920x1080: {
+      Engine_ResizeWindow(1920, 1080);
       break;
     }
     case MENU_RES_FULLSCREEN: {

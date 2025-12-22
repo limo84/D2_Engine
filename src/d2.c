@@ -1,5 +1,5 @@
 #define LSH
-#include "lsh_logger.h"
+#include <lsh/lsh_logger.h>
 #include "d2.h"
 #include "d2_keys.h"
 #include "d2_priv.h"
