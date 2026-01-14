@@ -1,17 +1,20 @@
 #define LSH
-#include "lsh_logger.h"
+#include <lsh/lsh_logger.h>
 #include "d2.h"
 #include "d2_keys.h"
 #include "d2_priv.h"
 #include "d2_structs.h"
 #include "glad.h"
 #include "shaders.txt"
+#include "stb_image.h"
+#include "stb_truetype.h"
 
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdlib.h>
 
 #define PI 3.14159265
 

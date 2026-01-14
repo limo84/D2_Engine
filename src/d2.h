@@ -1,16 +1,12 @@
 #pragma once
 
+// DIES IST EIN TEST
+
 #include <stdarg.h>
 #include <stdbool.h>
-#include <stdint.h>
-
-#include "glad.h"
+#include <lsh/lsh_types.h>
 
 #include "d2_structs.h"
-// #include "d2_keys.h"
-#include "stb_image.h"
-#include "stb_truetype.h"
-#include "lsh_logger.h"
 
 #define ANIMATION_NAME_LENGTH
 

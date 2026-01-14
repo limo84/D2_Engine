@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 Sprite *Sprite_New(Texture *texture, u32 x, u32 y) {
   Sprite *self = (Sprite *)calloc(1, sizeof(Sprite));

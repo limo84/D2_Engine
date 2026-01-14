@@ -1,4 +1,3 @@
-
 # run:
 # 	make test2 && ./test
 
@@ -40,6 +39,9 @@ windows_tests: test.c $(SRC)
 
 INCS := -I src/ -I vendor/
 OBJS_D2 := libd2/d2.o libd2/glad.o libd2/stb_image.o libd2/d2_sdl.o libd2/d2_sprite.o
+
+libd2:
+	mkdir -p libd2
 
 libd2.so: $(OBJS_D2)
 	gcc -shared -o libd2/libd2.so $(OBJS_D2) -lSDL2 -lSDL2_mixer
