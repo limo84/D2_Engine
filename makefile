@@ -17,9 +17,8 @@
 # 	-lversion \
 # 	-luuid
 
-
 SRC := src/*.c vendor/*.c
-test2: test.c $(SRC)
+windows_tests: test.c $(SRC)
 	gcc test.c $(SRC) -o test -I src/ -I vendor/ -L lib/ -lm -lSDL2 -lSDL2_mixer \
 	-lmingw32 \
 	-mwindows \

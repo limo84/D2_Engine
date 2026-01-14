@@ -77,8 +77,8 @@ void _Backend_CreateWindow(u32 width, u32 height, bool fullscreen) {
   }
 
   SDL_Window *window = NULL;
-  // Uint32 flags = SDL_WINDOW_OPENGL | (fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : SDL_WINDOW_RESIZABLE);
-  Uint32 flags = SDL_WINDOW_OPENGL | (fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
+  Uint32 flags = SDL_WINDOW_OPENGL | (fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : SDL_WINDOW_RESIZABLE);
+  // Uint32 flags = SDL_WINDOW_OPENGL | (fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
   //window = SDL_CreateWindow("D2_Engine", displayBounds[useDisplay].x, displayBounds[useDisplay].y,
   //    width, height, flags);
   window = SDL_CreateWindow("D2_Engine", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, flags);
@@ -95,6 +95,8 @@ void _Backend_CreateWindow(u32 width, u32 height, bool fullscreen) {
     printf("ERROR: Could not initialize glad.\n");
     exit(0);
   }
+
+  SDL_GL_SetSwapInterval(-1);
 
   printf("Vendor: %s\n", glGetString(GL_VENDOR));
   printf("Renderer: %s\n", glGetString(GL_RENDERER));
@@ -180,6 +182,7 @@ bool Engine_GetIsRunning() { return engine->isRunning; }
 void _Backend_InitTime() {
   startTime = SDL_GetTicks() / 1000.0f;
   endTime = SDL_GetTicks() / 1000.0f;
+  logger_log("start: %f\n", startTime);
 }
 
 void _Backend_CalculateDelta() {
@@ -192,6 +195,7 @@ void _Backend_CalculateDelta() {
   timeSinceLastFpsPrint += deltaInSeconds;
   if (timeSinceLastFpsPrint >= 1) {
     // printf("FPS: %f\n", frames / timeSinceLastFpsPrint);
+    logger_log("fps: %d, millis: %d\n", frames, SDL_GetTicks());
     timeSinceLastFpsPrint = 0;
     frames = 0;
   }
@@ -210,7 +214,7 @@ void Engine_ResizeWindow(int w, int h) {
 void Engine_SetWindowFullscreen() {
   window_width = 1920;
   window_height = 1080;
-  SDL_SetWindowSize(engine->window, 1920, 1080); 
+  SDL_SetWindowSize(engine->window, 1920, 1080);
   globalScale = window_width / 1920.0;
   _Engine_UpdateProjectionMatrix();
   glViewport(0, 0, window_width, window_height);

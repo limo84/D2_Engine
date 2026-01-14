@@ -9,4 +9,5 @@ ar rcs libd2/libd2.a libd2/d2.o libd2/glad.o libd2/stb_image.o libd2/d2_sdl.o li
 gcc -g test.c -o test -I src/ -I vendor/ -L libd2/ -ld2 -L lib/ -lm -lSDL2 -lSDL2_mixer -lmingw32 -mwindows -lsetupapi -limm32 -lole32 -loleaut32 -lcomdlg32 ^
 -luser32 -lgdi32 -lwinmm -lversion -luuid
 
+@REM make windows_tests
 test.exe
